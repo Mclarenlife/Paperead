@@ -10,23 +10,27 @@ import {
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { configureNativeEnvironment } from './native-env.mjs'
+import { configureNativeEnvironment, tauriCliEnvironment } from './native-env.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 process.chdir(root)
 configureNativeEnvironment(root)
 const platform = process.argv[2]
-const run = (command, args) => {
+const run = (command, args, options = {}) => {
   const result = spawnSync(command, args, {
     stdio: 'inherit',
     shell: process.platform === 'win32' && /\.(bat|cmd)$|^pnpm$/.test(command),
     windowsHide: true,
+    ...options,
   })
   if (result.error) throw result.error
   if (result.status !== 0) throw new Error(`${path.basename(command)} failed (${result.status})`)
 }
 const node = (script, ...args) => run(process.execPath, [script, ...args])
-const tauri = (...args) => node('node_modules/@tauri-apps/cli/tauri.js', ...args)
+const tauri = (...args) =>
+  run(process.execPath, ['node_modules/@tauri-apps/cli/tauri.js', ...args], {
+    env: tauriCliEnvironment(),
+  })
 const version = JSON.parse(readFileSync('package.json', 'utf8')).version
 const release = path.join(root, 'release')
 const deliver = (source, name) => {

@@ -3,7 +3,7 @@ import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { stripVTControlCharacters } from 'node:util'
-import { configureNativeEnvironment } from './native-env.mjs'
+import { configureNativeEnvironment, tauriCliEnvironment } from './native-env.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 process.chdir(root)
@@ -22,7 +22,7 @@ const build = spawn(
     '--',
     '--locked',
   ],
-  { windowsHide: true, stdio: ['inherit', 'pipe', 'pipe'] },
+  { windowsHide: true, stdio: ['inherit', 'pipe', 'pipe'], env: tauriCliEnvironment() },
 )
 for (const stream of [build.stdout, build.stderr])
   stream.on('data', (chunk) => {

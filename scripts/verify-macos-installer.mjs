@@ -26,7 +26,7 @@ try {
   attached = true
   const app = path.join(mount, 'Paperead.app')
   const executable = path.join(app, 'Contents/MacOS/paperead')
-  run('lipo', ['-verify_arch', 'arm64', 'x86_64', executable])
+  run('lipo', [executable, '-verify_arch', 'arm64', 'x86_64'])
   run('codesign', ['--verify', '--deep', '--strict', app])
   const info = path.join(app, 'Contents/Info.plist')
   const bundleVersion = run('/usr/libexec/PlistBuddy', [

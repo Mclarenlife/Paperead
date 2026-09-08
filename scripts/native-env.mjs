@@ -1,6 +1,13 @@
 import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
+// Generated mobile build tasks must call the CLI, not recursively call build:android.
+export const tauriCliEnvironment = () => ({
+  ...process.env,
+  npm_execpath: 'pnpm',
+  npm_lifecycle_event: 'tauri',
+})
+
 // Portable tools stay inside this project; system environment variables take precedence.
 export function configureNativeEnvironment(root) {
   const env = process.env
