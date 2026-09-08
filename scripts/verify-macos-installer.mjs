@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { mkdtempSync, readFileSync, readdirSync, rmdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
@@ -37,6 +37,39 @@ try {
   const identifier = run('/usr/libexec/PlistBuddy', ['-c', 'Print :CFBundleIdentifier', info])
   if (bundleVersion !== version || identifier !== 'app.paperead.reader')
     throw new Error('Unexpected app identity/version')
+  let startupLog = ''
+  const child = spawn(executable, [], { stdio: ['ignore', 'pipe', 'pipe'] })
+  for (const stream of [child.stdout, child.stderr])
+    stream.on('data', (chunk) => {
+      startupLog = (startupLog + chunk.toString()).slice(-8000)
+    })
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(resolve, 10_000)
+      child.once('error', (error) => {
+        clearTimeout(timer)
+        reject(error)
+      })
+      child.once('exit', (code, signal) => {
+        clearTimeout(timer)
+        reject(new Error(`App exited during startup (${code ?? signal}): ${startupLog}`))
+      })
+    })
+  } finally {
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill('SIGTERM')
+      await new Promise((resolve) => {
+        const timer = setTimeout(() => {
+          child.kill('SIGKILL')
+          resolve()
+        }, 5000)
+        child.once('exit', () => {
+          clearTimeout(timer)
+          resolve()
+        })
+      })
+    }
+  }
   const report = {
     file: name,
     sha256,
@@ -45,6 +78,7 @@ try {
     architectures: ['arm64', 'x86_64'],
     diskImageVerified: true,
     signatureVerified: true,
+    startupAliveForSeconds: 10,
     signature: run('codesign', ['-dv', app]),
     notarized: false,
     interactiveDeviceTest: false,

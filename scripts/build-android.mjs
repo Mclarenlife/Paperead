@@ -2,6 +2,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { stripVTControlCharacters } from 'node:util'
 import { configureNativeEnvironment } from './native-env.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -33,6 +34,7 @@ const status = await new Promise((resolve, reject) => {
   build.on('close', resolve)
 })
 if (status === 0) process.exit(0)
+tail = stripVTControlCharacters(tail)
 // Tauri has already compiled/embedded the frontend before trying to link jniLibs.
 // Only this specific Windows permission failure may use the copy fallback.
 if (
