@@ -2,7 +2,9 @@
 
 **让阅读，沉淀为知识。** 一个使用 Tauri 2、React 19 与 TypeScript 构建的本地优先论文阅读工作台。
 
-这是可运行的 **0.1.6 开发版**：改进 DeepSeek V4 首字等待、双栏分段、Markdown 标题和 LaTeX 公式保护，支持并行批次即时预览。保留 PDF／Word 导出、快照、DOI 与引用管理、笔记文件夹／标签／历史／图片、离线 OCR 和视觉解析。macOS / Android / iOS 尚未完成原生构建和真机验证；不包含 WebDAV 或云同步。
+这是可运行的 **0.1.6 开发版**：改进 DeepSeek V4 首字等待、双栏分段、Markdown 标题和 LaTeX 公式保护，支持并行批次即时预览。保留 PDF／Word 导出、快照、DOI 与引用管理、笔记文件夹／标签／历史／图片、离线 OCR 和视觉解析。已生成 Windows、Android ARM64 与 macOS 通用版安装包；Android 和 macOS 仍需用户设备上的完整使用验收，iOS 尚未打包。不包含 WebDAV 或云同步。
+
+Android 测试包：`release/Paperead_0.1.6_Android-arm64-test.apk`（release 优化、测试签名，最低 API 26）。macOS 测试包：`release/Paperead_0.1.6_macOS-universal.dmg`（Apple Silicon / Intel，ad-hoc 签名，未公证）。安装与构建说明见 [原生平台文档](docs/NATIVE-PLATFORMS.md)；macOS 产物也可从 [GitHub Actions](https://github.com/Mclarenlife/Paperead/actions/workflows/macos-installer.yml) 下载。
 
 Windows 安装包：`release/Paperead_0.1.6_x64-setup.exe`（未签名开发版）。关闭旧版后运行安装包升级，资料保留；旧译文需点击“使用当前配置重新处理”应用新的分段和公式保护。缺少 WebView2 时需要联网安装运行时。详见 [本次修复与验收](docs/AI-0.1.6.md)、[Windows 打包](docs/WINDOWS-BUILD.md)、[其他平台](docs/NATIVE-PLATFORMS.md)。
 

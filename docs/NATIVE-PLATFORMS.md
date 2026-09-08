@@ -41,6 +41,15 @@ pnpm build:ios
 
 macOS 脚本构建 `universal-apple-darwin`，同时包含 Apple Silicon 和 Intel 代码，输出 `release/Paperead_0.1.6_macOS-universal.dmg` 与 SHA-256。未配置 Developer ID 时使用 ad-hoc 签名，未进行 Apple 公证。打开 DMG 后将 Paperead 拖入 Applications。这是直接安装测试版本，不用于 App Store 分发。
 
+2026-09-08 已完成 [macOS 构建](https://github.com/Mclarenlife/Paperead/actions/runs/34196862402) 和 [独立安装包校验](https://github.com/Mclarenlife/Paperead/actions/runs/34198165169)：镜像校验及只读挂载、Apple Silicon / Intel 架构检查、完整签名校验、版本与标识检查全部通过，应用在 macOS 云端成功启动并保持运行 10 秒。DMG 大小 66,096,117 字节，已下载到本地 `release/`；这不替代用户设备上的文件选择器、Keychain 和实际阅读操作验收。
+
+本次安装包 SHA-256：
+
+| 文件              | SHA-256                                                            |
+| ----------------- | ------------------------------------------------------------------ |
+| Android ARM64 APK | `145d19f8552d27bf541d3656b785df24015eee6051c4b286ec15f1c9383e84de` |
+| macOS 通用 DMG    | `29e91a76126acc5a12fbfbab6b14735c6dc11d184238bc1c7cb9bc2de36feeed` |
+
 源码仓库为 [Mclarenlife/Paperead](https://github.com/Mclarenlife/Paperead)。在 Actions 中手动运行 **Build macOS test installer**，完成后下载 **Paperead-macOS-universal** 产物，保留 14 天。工作流使用 Node 24、项目锁定的 pnpm 和 Rust 1.98.1，运行单元测试，构建 DMG，校验磁盘镜像、应用标识、版本、双架构和签名，并运行 10 秒启动检查。也可用 **Verify existing macOS installer** 验证已有构建产物。
 
 iOS 工程需要在 Xcode 中配置开发团队及设备签名。本次不交付 IPA。
