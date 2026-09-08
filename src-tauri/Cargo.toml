@@ -1,0 +1,34 @@
+[package]
+name = "paperead"
+version = "0.1.6"
+description = "A local-first academic reading workspace"
+edition = "2021"
+rust-version = "1.85"
+
+[lib]
+name = "paperead_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-http = "=2.6.0"
+
+[target.'cfg(any(target_os = "windows", target_os = "macos", target_os = "linux"))'.dependencies]
+tauri-plugin-single-instance = "2"
+
+[target.'cfg(any(target_os = "windows", target_os = "macos", target_os = "ios"))'.dependencies]
+keyring = { version = "3.6.3", features = ["windows-native", "apple-native"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+tauri-plugin-paperead-credentials = { path = "plugins/secure-credentials" }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

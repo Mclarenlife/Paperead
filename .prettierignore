@@ -1,0 +1,8 @@
+node_modules
+dist
+public/pdfjs
+src-tauri/gen
+src-tauri/target
+pnpm-lock.yaml
+.tmp
+test-results

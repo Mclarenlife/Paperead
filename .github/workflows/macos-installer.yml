@@ -1,0 +1,38 @@
+name: Build macOS test installer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    env:
+      RUSTUP_TOOLCHAIN: '1.98.1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v6
+      - name: Install Rust toolchain
+        run: rustup toolchain install 1.98.1 --profile minimal
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build universal DMG
+        run: pnpm build:macos
+      - name: Upload test installer and checksum
+        uses: actions/upload-artifact@v7
+        with:
+          name: Paperead-macOS-universal
+          path: |
+            release/Paperead_*_macOS-universal.dmg
+            release/Paperead_*_macOS-universal.dmg.sha256
+          if-no-files-found: error
+          retention-days: 14
