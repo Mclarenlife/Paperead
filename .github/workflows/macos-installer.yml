@@ -27,6 +27,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build universal DMG
         run: pnpm build:macos
+      - name: Verify DMG, architectures and ad-hoc signature
+        run: node scripts/verify-macos-installer.mjs
       - name: Upload test installer and checksum
         uses: actions/upload-artifact@v7
         with:
@@ -34,5 +36,6 @@ jobs:
           path: |
             release/Paperead_*_macOS-universal.dmg
             release/Paperead_*_macOS-universal.dmg.sha256
+            release/macos-verification.json
           if-no-files-found: error
           retention-days: 14

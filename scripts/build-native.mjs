@@ -53,7 +53,7 @@ node('scripts/fetch-reading-assets.mjs')
 node('scripts/prepare-pdf.mjs')
 if (platform === 'android') {
   if (!existsSync('src-tauri/gen/android/app/build.gradle.kts')) tauri('android', 'init', '--ci')
-  tauri('android', 'build', '--apk', '--target', 'aarch64', '--ci', '--', '--locked')
+  node('scripts/build-android.mjs')
   node('scripts/sign-android-test.mjs')
 } else if (platform === 'macos') {
   run('rustup', ['target', 'add', 'aarch64-apple-darwin', 'x86_64-apple-darwin'])

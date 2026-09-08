@@ -1,0 +1,40 @@
+name: Verify existing macOS installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Build workflow run ID to verify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: Paperead-macOS-universal
+          path: release
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.build_run_id }}
+      - name: Verify DMG, architectures and ad-hoc signature
+        run: node scripts/verify-macos-installer.mjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Paperead-macOS-verification
+          path: release/macos-verification.json
+          if-no-files-found: error
+          retention-days: 14
