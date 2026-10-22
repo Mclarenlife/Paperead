@@ -1,0 +1,806 @@
+/* Shared type and spacing roles; research and scope: docs/TYPOGRAPHY.md. */
+:root {
+  --font-ui:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', 'Noto Sans SC Variable', sans-serif;
+  --font-code: 'SFMono-Regular', Consolas, 'Liberation Mono', 'Noto Sans SC Variable', monospace;
+  --text-caption: 0.75rem;
+  --text-small: 0.8125rem;
+  --text-ui: 0.875rem;
+  --text-input: 0.9375rem;
+  --text-section: 1rem;
+  --text-reading: 1.125rem;
+  --text-heading: 1.25rem;
+  --text-title: 1.5rem;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  font-family: var(--font-ui);
+  line-height: 1.5;
+}
+body {
+  font-size: var(--text-ui);
+}
+.button,
+.button.small,
+.text-button,
+.segmented > button,
+.reader-header .button,
+.ai-action-card .button,
+.side-content > .full-width,
+.job-actions .text-button,
+.data-action .button,
+.modal-actions > .button,
+.modal-actions > .text-button {
+  font-size: var(--text-ui);
+  line-height: 1.5;
+  min-height: 36px;
+}
+.button,
+.button.small {
+  padding: 8px 12px;
+  gap: 8px;
+}
+.icon-button {
+  min-width: 36px;
+  min-height: 36px;
+}
+.main-navigation > button,
+.collection-navigation > button,
+.sidebar-settings,
+.workspace-tab {
+  font-size: var(--text-ui);
+}
+.sidebar-section-label,
+.local-status {
+  font-size: var(--text-caption);
+}
+.tag {
+  height: auto;
+  min-height: 24px;
+  padding: 3px 6px;
+}
+.paper-tags {
+  height: 28px;
+}
+.paper-title {
+  height: auto;
+  min-height: 42px;
+}
+.paper-info {
+  padding-top: 16px;
+}
+.status {
+  line-height: 1.5;
+}
+.modal {
+  padding: var(--space-6);
+}
+.modal-heading {
+  margin-bottom: var(--space-6);
+  gap: var(--space-4);
+}
+.modal-heading h2 {
+  font-size: var(--text-heading);
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.modal-actions {
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.field {
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  font-size: var(--text-ui);
+  color: var(--ink);
+}
+.field input,
+.field select,
+.field textarea,
+.annotation-filters input,
+.annotation-filters select,
+.note-organization input,
+.note-organization select,
+.note-filters select,
+.reader-search-input input {
+  font-size: var(--text-input);
+  line-height: 1.5;
+  min-height: 44px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+.input-with-icon > input {
+  padding-left: 36px;
+}
+.input-with-icon > svg {
+  top: 14px;
+}
+.field-hint,
+.settings-intro p,
+.privacy-note p,
+.data-action p,
+.annotations-empty p,
+.ai-side-intro p,
+.ai-action-card p,
+.job-card > p,
+.bilingual-option,
+.document-progress-note,
+.connection-progress {
+  font-size: var(--text-small);
+  line-height: 1.65;
+  color: var(--muted);
+}
+.field-hint {
+  margin: 8px 0 20px;
+}
+.form-two {
+  gap: 0 var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+.settings-modal {
+  width: 760px;
+}
+.settings-tabs {
+  gap: var(--space-6);
+  margin: 0 0 24px;
+  padding: 0;
+}
+.settings-tabs > button {
+  font-size: var(--text-ui);
+  padding: 12px 0;
+  min-height: 48px;
+}
+.settings-tabs > button.active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.settings-intro {
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.settings-intro h3,
+.settings-content > h3 {
+  font-size: var(--text-section);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.profile-manager,
+.backup-policy {
+  padding: var(--space-5);
+  margin: 0 0 24px;
+  background: var(--bg);
+}
+.profile-manager .field:last-of-type {
+  margin-bottom: 0;
+}
+.profile-manager .field-hint {
+  margin: 12px 0 0;
+}
+.profile-actions {
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.provider-options {
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+}
+.provider-options > button {
+  height: auto;
+  min-height: 48px;
+  padding: 8px;
+  font-size: var(--text-ui);
+  line-height: 1.5;
+}
+.provider-options > button.active,
+[data-theme='dark'] .provider-options > button.active {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+.feature-icon,
+[data-theme='dark'] .feature-icon {
+  background: var(--accent-soft);
+  border-color: var(--line);
+  color: var(--accent);
+}
+.privacy-note {
+  padding: var(--space-4);
+  gap: var(--space-3);
+  margin: 20px 0 12px;
+}
+.theme-options {
+  gap: var(--space-3);
+  margin: 24px 0 32px;
+}
+.theme-options > button {
+  min-height: 112px;
+  height: auto;
+  font-size: var(--text-ui);
+  padding: 16px 8px;
+}
+.theme-options > button.active {
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+.data-action {
+  padding: var(--space-6) 0;
+  gap: var(--space-4);
+}
+.data-action h4 {
+  font-size: var(--text-section);
+  color: var(--ink);
+}
+.snapshot-row b {
+  font-size: var(--text-ui);
+  color: var(--ink);
+}
+.ai-performance-options summary {
+  font-size: var(--text-ui);
+}
+
+/* Reading UI stays separate from PDF.js text coordinates and the PDF's own fonts. */
+.reader-header {
+  height: auto;
+  min-height: 80px;
+  padding: 12px 24px;
+  gap: var(--space-3);
+}
+.reader-heading strong {
+  font-size: var(--text-section);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.reader-heading > span {
+  font-size: var(--text-small);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.reader-toolbar {
+  height: auto;
+  min-height: 60px;
+  flex-wrap: wrap;
+  padding: 4px 24px;
+  gap: 8px 16px;
+}
+.reader-mode-tabs {
+  height: auto;
+  min-height: 48px;
+  gap: var(--space-4);
+}
+.reader-mode-tabs > button {
+  font-size: var(--text-ui);
+  min-height: 48px;
+  gap: 8px;
+}
+.reader-mode-tabs > button.active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.page-controls,
+.zoom-controls {
+  font-size: var(--text-ui);
+  gap: var(--space-2);
+}
+.page-controls small {
+  font-size: var(--text-small);
+}
+.page-input {
+  width: 48px;
+  height: 36px;
+  font-size: var(--text-ui);
+  padding: 4px;
+}
+.reader-body {
+  position: relative;
+  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+.reader-body.side-hidden {
+  grid-template-columns: minmax(0, 1fr);
+}
+.reader-scroll {
+  padding: var(--space-6);
+}
+.reading-paper {
+  padding: 32px 40px;
+  border-color: var(--line);
+  max-width: 880px;
+}
+.reading-page-label {
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  margin-bottom: 24px;
+  border-color: var(--line);
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.reading-page-number {
+  font: inherit;
+  font-size: var(--text-caption);
+}
+.demo-notice {
+  font-size: var(--text-caption);
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+.markdown,
+.markdown-preview-pane .markdown,
+.result-preview .markdown {
+  font-size: var(--text-reading);
+  line-height: 1.85;
+}
+.reading-paper .markdown {
+  font-size: calc(var(--text-reading) * var(--reading-zoom, 1));
+}
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  font-family: var(--font-ui);
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.markdown h1 {
+  font-size: 1.65em;
+  margin-bottom: 24px;
+}
+.markdown h2 {
+  font-size: 1.35em;
+  margin: 32px 0 16px;
+}
+.markdown h3 {
+  font-size: 1.15em;
+  margin: 24px 0 12px;
+}
+.markdown p {
+  margin-bottom: 1.1em;
+}
+.markdown blockquote {
+  font-size: 1em;
+  padding: 12px 16px;
+  margin: 24px 0;
+  border-color: var(--neutral-8);
+}
+.markdown code {
+  font-family: var(--font-code);
+  font-size: 0.9em;
+  line-height: inherit;
+}
+.markdown table {
+  font-size: 0.9em;
+  line-height: 1.7;
+}
+.side-tabs,
+.reader-side .side-tabs {
+  height: auto;
+  min-height: 56px;
+  padding: 0 12px;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.side-tabs > button:not(.icon-button),
+.reader-side .side-tabs > button:not(.icon-button) {
+  font-size: var(--text-ui);
+  min-height: 48px;
+  height: auto;
+  padding: 8px;
+}
+.side-tabs > button > span {
+  font-size: var(--text-caption);
+}
+.side-content {
+  padding: var(--space-5);
+}
+.reader-side-footer {
+  min-height: 40px;
+  height: auto;
+  font-size: var(--text-caption);
+  padding: 8px 12px;
+  text-align: center;
+}
+.annotation-heading,
+.annotation-card-meta > button:first-child,
+.annotation-card-footer small,
+.ai-service small,
+.job-heading small {
+  font-size: var(--text-small);
+}
+.annotation-compose,
+[data-theme='dark'] .annotation-compose {
+  padding: var(--space-4);
+  background: var(--bg);
+  border-color: var(--line);
+  margin-bottom: 20px;
+}
+.annotation-compose blockquote,
+.annotation-card blockquote,
+.annotation-card > p {
+  font-size: var(--text-ui);
+  line-height: 1.75;
+}
+.annotation-compose textarea {
+  font-size: var(--text-input);
+  line-height: 1.6;
+  padding: 12px;
+}
+.annotation-compose-actions {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.annotation-card {
+  padding: 12px 16px;
+  background: var(--surface);
+}
+.annotation-card > p {
+  color: var(--ink);
+}
+.annotation-card-footer {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.annotation-card-footer .text-button {
+  font-size: var(--text-small);
+}
+.annotations-empty h3,
+.ai-side-intro h3,
+.ai-action-card h4 {
+  font-size: var(--text-section);
+  color: var(--ink);
+}
+.ai-service > span:nth-child(2),
+.job-heading {
+  font-size: var(--text-ui);
+  color: var(--ink);
+}
+.ai-action-card,
+.job-card {
+  padding: var(--space-4);
+  margin: 16px 0;
+}
+.job-heading,
+.job-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.search-match,
+.outline-entry,
+.bookmark-row > button:first-child {
+  font-size: var(--text-ui);
+  line-height: 1.6;
+}
+.search-match small,
+.outline-entry small,
+.bookmark-row small {
+  font-size: var(--text-small);
+}
+.progress-track {
+  background: var(--line);
+}
+.progress-track > i {
+  background: var(--accent);
+}
+.result-editor-panes textarea {
+  font-family: var(--font-code);
+  font-size: var(--text-section);
+  line-height: 1.85;
+}
+.highlight-yellow {
+  background: #f5d86b;
+  color: #202020;
+}
+.highlight-green {
+  background: #91d7b2;
+  color: #202020;
+}
+.highlight-purple {
+  background: #c2acf0;
+  color: #202020;
+}
+.annotation-card {
+  border-left-color: #b79120;
+}
+.annotation-green {
+  border-left-color: #438663;
+}
+.annotation-purple {
+  border-left-color: #8b6abf;
+}
+
+.notes-page {
+  height: calc(100dvh - var(--workspace-bar-height) - 62px);
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+.notes-sidebar {
+  padding: 24px 16px;
+}
+.notes-sidebar-title {
+  padding: 0;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+.notes-sidebar-title h1 {
+  font-family: var(--font-ui);
+  font-size: var(--text-title);
+  line-height: 1.4;
+  margin-top: 8px;
+}
+.notes-sidebar-title .eyebrow,
+.pane-label {
+  font-size: var(--text-caption);
+  letter-spacing: 0.05em;
+}
+.note-search {
+  margin-bottom: 16px;
+}
+.note-search input {
+  font-size: var(--text-input);
+  line-height: 1.5;
+  padding: 12px 0;
+}
+.note-list-item {
+  padding: 16px;
+  margin-bottom: 8px;
+}
+.note-list-item b {
+  font-size: var(--text-section);
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--ink);
+}
+.note-list-item small {
+  font-size: var(--text-caption);
+}
+.note-list-item p {
+  font-size: var(--text-small);
+  line-height: 1.65;
+}
+.note-list-item.active,
+[data-theme='dark'] .note-list-item.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.note-list-item.active b {
+  color: var(--accent-text);
+}
+.note-import {
+  font-size: var(--text-ui);
+}
+.note-editor-toolbar {
+  height: auto;
+  min-height: 64px;
+  padding: 12px 24px;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.save-state {
+  font-size: var(--text-small);
+}
+.segmented > button {
+  padding: 6px 10px;
+}
+.segmented > button.active {
+  color: var(--ink);
+  background: var(--surface);
+}
+.note-title-area {
+  padding: 24px;
+}
+.note-title-area > input {
+  font-family: var(--font-ui);
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+.note-source {
+  font-size: var(--text-small);
+  line-height: 1.5;
+  margin-top: 12px;
+}
+.note-organization {
+  padding: 12px 24px;
+  gap: 8px;
+}
+.markdown-edit-pane,
+.markdown-preview-pane {
+  padding: 20px 24px 24px;
+}
+.markdown-edit-pane,
+[data-theme='dark'] .markdown-edit-pane {
+  background: var(--bg);
+}
+.markdown-edit-pane textarea {
+  font-family: var(--font-code);
+  font-size: var(--text-section);
+  line-height: 1.85;
+  color: var(--ink);
+}
+.pane-label {
+  margin-bottom: 16px;
+}
+.note-statusbar {
+  height: auto;
+  min-height: 40px;
+  padding: 8px 20px;
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  flex-wrap: wrap;
+}
+.inline-confirm {
+  font-size: var(--text-ui);
+  padding: 12px 20px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1100px) and (min-width: 781px) {
+  .reader-body {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+  .reader-body.side-hidden {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .notes-page {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .reading-paper {
+    padding: 24px;
+  }
+}
+@media (max-width: 780px) {
+  :root {
+    --text-input: 1rem;
+    --text-reading: 1.0625rem;
+  }
+  .reader-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .reader-side {
+    top: 0;
+    width: min(360px, 100%);
+  }
+  .reader-header {
+    min-height: 80px;
+    padding: 12px;
+  }
+  .reader-header-actions {
+    gap: 4px;
+  }
+  .reader-heading strong {
+    font-size: var(--text-input);
+  }
+  .reader-heading > span {
+    font-size: var(--text-caption);
+    max-width: none;
+  }
+  .reader-toolbar {
+    padding: 4px 12px;
+    gap: 4px 8px;
+  }
+  .reader-mode-tabs {
+    flex: 1 0 100%;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .reader-mode-tabs > button {
+    font-size: var(--text-ui);
+    padding: 0 4px;
+  }
+  .reader-mode-tabs > button > svg {
+    width: 16px;
+  }
+  .reader-toolbar > .icon-button {
+    margin-left: auto;
+  }
+  .reader-scroll {
+    padding: 16px 12px;
+  }
+  .reading-paper {
+    padding: 24px;
+  }
+  .notes-page {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .note-editor-toolbar {
+    padding: 8px 12px;
+  }
+  .note-title-area,
+  .markdown-edit-pane,
+  .markdown-preview-pane {
+    padding: 20px;
+  }
+  .note-organization {
+    padding: 12px 20px;
+  }
+  .modal {
+    padding: 20px;
+  }
+  .settings-tabs {
+    gap: 20px;
+    margin: 0 0 20px;
+    padding: 0;
+  }
+  .profile-manager,
+  .backup-policy {
+    padding: 16px;
+  }
+  .modal-actions {
+    gap: 8px;
+  }
+}
+@media (max-width: 560px) {
+  .icon-button,
+  .reader-header .button,
+  .reader-header > .icon-button,
+  .reader-header-actions > .icon-button,
+  .reader-toolbar > .icon-button,
+  .page-controls .icon-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .button,
+  .segmented > button {
+    min-height: 44px;
+  }
+  .note-editor-toolbar .segmented > button {
+    padding: 6px 8px;
+  }
+  .note-editor-toolbar {
+    gap: 4px;
+  }
+  .notes-page {
+    display: block;
+  }
+  .notes-sidebar {
+    padding: 24px 16px;
+  }
+  .form-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .provider-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .data-action {
+    flex-wrap: wrap;
+  }
+  .data-action > div {
+    flex: 1 0 100%;
+  }
+  .data-action p {
+    max-width: none;
+  }
+  .modal-actions > .text-button:first-child {
+    flex-basis: 100%;
+    text-align: left;
+  }
+  .theme-options {
+    gap: 8px;
+  }
+  .theme-options > button {
+    font-size: var(--text-small);
+  }
+  .note-statusbar > span:last-child {
+    max-width: none;
+    text-align: left;
+  }
+  .markdown-workspace.mode-split {
+    overflow: auto;
+  }
+  .mode-split > .markdown-edit-pane,
+  .mode-split > .markdown-preview-pane {
+    flex: 0 0 auto;
+    min-height: 240px;
+    overflow: visible;
+  }
+  .note-editor-toolbar .mobile-only {
+    display: inline-flex;
+  }
+}

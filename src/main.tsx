@@ -7,6 +7,7 @@ import '@fontsource-variable/noto-serif-sc'
 import './styles.css'
 import './workspace.css'
 import './palette.css'
+import './typography.css'
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: string }> {
   state = { error: '' }

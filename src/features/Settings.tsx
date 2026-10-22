@@ -190,7 +190,7 @@ export function Settings({
     }
   }
   return (
-    <Modal title="偏好设置" onClose={onClose} wide>
+    <Modal title="偏好设置" onClose={onClose} wide className="settings-modal">
       {switchTo && (
         <Modal
           title="切换配置"
@@ -604,7 +604,7 @@ export function Settings({
             <div className="privacy-note">
               <BookLogo />
               <p>
-                Paperead 0.1.9 · 本地优先的论文阅读工作台
+                Paperead 0.1.10 · 本地优先的论文阅读工作台
                 <br />
                 快捷键：Ctrl / ⌘ K 搜索 · Ctrl / ⌘ O 导入 · Esc 关闭面板
               </p>

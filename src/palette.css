@@ -168,12 +168,12 @@ body {
 }
 .paper-authors,
 .paper-footer {
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .section-heading p,
 .sidebar-section-label,
 .local-status {
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .paper-title:hover,
 .markdown a,
@@ -226,7 +226,7 @@ body {
 [data-theme='dark'] .status {
   color: var(--muted);
   background: var(--hover);
-  font-size: 10px;
+  font-size: var(--text-small);
 }
 .status-reading,
 [data-theme='dark'] .status-reading {

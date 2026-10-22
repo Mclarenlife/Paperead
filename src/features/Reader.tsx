@@ -548,12 +548,19 @@ export function Reader({
           >
             <Pencil size={17} />
           </button>
-          <button className="button" onClick={() => setExportOpen(true)}>
+          <button
+            className="button"
+            aria-label="导出"
+            title="导出"
+            onClick={() => setExportOpen(true)}
+          >
             <Download size={15} />
             <span>导出</span>
           </button>
           <button
             className="button primary"
+            aria-label="AI 阅读助手"
+            title="AI 阅读助手"
             onClick={() => {
               setSide('ai')
               setShowSide(true)

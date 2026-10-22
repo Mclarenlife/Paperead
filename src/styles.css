@@ -20,7 +20,7 @@
 .note-filters select {
   min-width: 0;
   padding: 7px;
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .note-filters button {
   grid-column: 1 / -1;
@@ -36,7 +36,7 @@
 .note-organization input,
 .note-organization select {
   padding: 7px 10px;
-  font-size: 12px;
+  font-size: var(--text-ui);
   min-width: 0;
   max-width: 210px;
 }
@@ -54,7 +54,7 @@
   padding: 8px 12px;
   margin: 0;
   border-bottom: 1px solid var(--line);
-  font-size: 13px;
+  font-size: var(--text-ui);
 }
 .snapshot-row,
 .folder-row {
@@ -70,7 +70,7 @@
   min-width: 180px;
 }
 .snapshot-row b {
-  font-size: 12px;
+  font-size: var(--text-ui);
   font-weight: 500;
 }
 .snapshot-row small {
@@ -90,7 +90,7 @@
   background: var(--sidebar);
   padding: 18px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: var(--text-ui);
 }
 .backup-policy {
   background: var(--sidebar);
@@ -106,7 +106,7 @@
 .reference-notice {
   padding: 8px 24px;
   background: var(--green-light);
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .green-text {
   color: var(--green);
@@ -243,11 +243,11 @@ h1 {
 }
 .muted {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-ui);
 }
 .subtle-text {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 400;
 }
 .online-dot {
@@ -268,7 +268,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--surface);
-  font-size: 12px;
+  font-size: var(--text-ui);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -298,7 +298,7 @@ h1 {
 .button.small {
   min-height: 30px;
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .full-width {
   width: 100%;
@@ -338,7 +338,7 @@ h1 {
   align-items: center;
   gap: 6px;
   color: var(--green);
-  font-size: 12px;
+  font-size: var(--text-ui);
   padding: 4px 0;
 }
 .text-button:hover {
@@ -350,7 +350,7 @@ h1 {
   justify-content: center;
   gap: 12px;
   color: var(--green);
-  font-size: 13px;
+  font-size: var(--text-ui);
   padding: 16px;
 }
 .spin {
@@ -426,12 +426,12 @@ h1 {
 }
 .workspace-label > span:nth-child(2) {
   flex: 1;
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 500;
 }
 .workspace-label small {
   display: block;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin-top: 3px;
 }
@@ -442,14 +442,14 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   padding: 0 13px;
   margin-bottom: 12px;
   letter-spacing: 1px;
 }
 .sidebar-section-label > span {
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1.2px;
   color: var(--muted);
 }
@@ -465,7 +465,7 @@ h1 {
   align-items: center;
   gap: 11px;
   text-align: left;
-  font-size: 12px;
+  font-size: var(--text-ui);
   border-radius: 7px;
   padding: 12px 13px;
   color: var(--muted);
@@ -486,7 +486,7 @@ h1 {
 }
 .main-navigation small,
 .collection-navigation small {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   font-weight: 400;
 }
@@ -503,7 +503,7 @@ h1 {
   padding-right: 5px;
 }
 .collection-navigation > button {
-  font-size: 11px;
+  font-size: var(--text-small);
   padding: 10px 13px;
 }
 .collection-navigation small {
@@ -536,7 +536,7 @@ h1 {
   color: var(--muted);
 }
 .ai-promo-title b {
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 500;
   flex: 1;
 }
@@ -549,13 +549,13 @@ h1 {
   letter-spacing: 0.5px;
 }
 .ai-promo p {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin: 9px 0 11px;
   white-space: nowrap;
 }
 .ai-promo-link {
-  font-size: 10px;
+  font-size: var(--text-small);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -567,7 +567,7 @@ h1 {
   gap: 11px;
   padding: 20px 13px 15px;
   width: 100%;
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .sidebar-settings > span:nth-child(2) {
@@ -575,7 +575,7 @@ h1 {
   text-align: left;
 }
 .shortcut {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .local-status {
@@ -584,7 +584,7 @@ h1 {
   align-items: center;
   gap: 7px;
   padding: 10px 7px 0;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .local-status button {
@@ -611,11 +611,11 @@ h1 {
   align-items: center;
   gap: 13px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-small);
   white-space: nowrap;
 }
 .breadcrumb b {
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 500;
   color: var(--muted);
 }
@@ -638,7 +638,7 @@ h1 {
   border: 0;
   border-radius: 0;
   width: 204px;
-  font-size: 11px;
+  font-size: var(--text-small);
   height: 32px;
   padding: 0;
   box-shadow: none;
@@ -689,7 +689,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   letter-spacing: 2.1px;
   font-weight: 500;
   color: var(--muted);
@@ -713,7 +713,7 @@ h1 {
   overflow: hidden;
 }
 .welcome h1 {
-  font-family: 'Noto Serif SC Variable', 'Songti SC', Georgia, serif;
+  font-family: var(--font-ui);
   font-size: 32px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -725,7 +725,7 @@ h1 {
   color: var(--muted);
 }
 .welcome p {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
   letter-spacing: 0.3px;
   margin-bottom: 21px;
@@ -736,12 +736,12 @@ h1 {
   gap: 16px;
 }
 .welcome-actions > .button {
-  font-size: 11px;
+  font-size: var(--text-small);
   min-height: 35px;
   padding: 8px 13px;
 }
 .welcome-actions > span {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .hero-illustration {
@@ -798,7 +798,7 @@ h1 {
 .book-label {
   display: block;
   margin-top: 12px;
-  font-size: 10px;
+  font-size: var(--text-small);
   line-height: 1.6;
   letter-spacing: 1px;
   font-weight: 500;
@@ -924,7 +924,7 @@ h1 {
   color: var(--ink);
 }
 .overview-stat span {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   display: block;
   margin-top: 4px;
@@ -959,13 +959,13 @@ h1 {
   min-width: 0;
 }
 .continue-reading small {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   display: block;
   margin-bottom: 6px;
 }
 .continue-reading b {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   display: block;
   white-space: nowrap;
@@ -1007,7 +1007,7 @@ h1 {
 }
 .section-heading p {
   margin: 7px 0 0;
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .library-toolbar {
@@ -1023,7 +1023,7 @@ h1 {
   align-self: stretch;
 }
 .filter-tabs > button {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
   display: flex;
   align-items: center;
@@ -1046,7 +1046,7 @@ h1 {
   background: #848484;
 }
 .filter-tabs > button > span {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   font-weight: 400;
 }
@@ -1056,7 +1056,7 @@ h1 {
   gap: 11px;
 }
 .filter-button {
-  font-size: 10px !important;
+  font-size: var(--text-small) !important;
   color: var(--muted);
 }
 .filter-button > i {
@@ -1075,7 +1075,7 @@ h1 {
   border: 0;
   background: none;
   border-radius: 0;
-  font-size: 10px;
+  font-size: var(--text-small);
   appearance: none;
   padding: 6px 0;
   color: var(--muted);
@@ -1109,7 +1109,7 @@ h1 {
   margin-bottom: 17px;
 }
 .tag-filter > span {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   margin-right: 6px;
 }
@@ -1279,7 +1279,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: #8e8e8e;
   background: #ffffffaf;
   border: 1px solid #ffffffc4;
@@ -1298,7 +1298,7 @@ h1 {
   margin-bottom: 8px;
 }
 .status {
-  font-size: 8px;
+  font-size: var(--text-caption);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -1355,7 +1355,7 @@ h1 {
   color: var(--muted);
 }
 .paper-authors {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin: 9px 0 11px;
   white-space: nowrap;
@@ -1369,7 +1369,7 @@ h1 {
   overflow: hidden;
 }
 .tag {
-  font-size: 8px;
+  font-size: var(--text-caption);
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -1407,7 +1407,7 @@ h1 {
   border-top: 1px solid #f0f0f0;
   margin-top: 7px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: var(--text-caption);
 }
 .paper-footer > span {
   display: flex;
@@ -1431,7 +1431,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   margin-top: 18px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .library-bottom > span:last-child {
@@ -1454,14 +1454,14 @@ h1 {
   gap: 12px;
 }
 .section-heading.compact .subtle-text {
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1.4px;
 }
 .section-heading.compact {
   margin-bottom: 15px;
 }
 .section-heading.compact .text-button {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .collection-cards {
@@ -1500,7 +1500,7 @@ h1 {
 }
 .collection-card b {
   display: block;
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -1509,7 +1509,7 @@ h1 {
 }
 .collection-card small {
   display: block;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin-top: 5px;
 }
@@ -1522,7 +1522,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   padding: 34px 0 25px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .small-brand {
@@ -1611,13 +1611,13 @@ h1 {
   margin-bottom: 8px;
 }
 .empty-state p {
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--muted);
   margin-bottom: 20px;
   max-width: 370px;
 }
 .empty-state .button {
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .modal-backdrop {
   position: fixed;
@@ -1657,7 +1657,7 @@ h1 {
   letter-spacing: 0.5px;
 }
 .modal > p {
-  font-size: 13px;
+  font-size: var(--text-ui);
 }
 .modal-actions {
   display: flex;
@@ -1673,7 +1673,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 500;
   color: var(--muted);
   margin: 0 0 16px;
@@ -1686,7 +1686,7 @@ h1 {
 .field textarea {
   padding: 11px 12px;
   width: 100%;
-  font-size: 12px;
+  font-size: var(--text-ui);
   line-height: 1.5;
   font-weight: 400;
 }
@@ -1695,7 +1695,7 @@ h1 {
   min-height: 80px;
 }
 .field-hint {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   line-height: 1.8;
   overflow-wrap: anywhere;
@@ -1726,7 +1726,7 @@ h1 {
   padding: 0 25px;
 }
 .settings-tabs > button {
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--muted);
   padding: 12px 0;
   border-bottom: 2px solid transparent;
@@ -1757,7 +1757,7 @@ h1 {
   margin: 0 0 5px;
 }
 .settings-intro p {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   margin: 0;
 }
@@ -1774,7 +1774,7 @@ h1 {
   align-items: center;
   justify-content: center;
   height: 39px;
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
   background: var(--bg);
 }
@@ -1798,7 +1798,7 @@ h1 {
   margin-top: 3px;
 }
 .privacy-note p {
-  font-size: 10px;
+  font-size: var(--text-small);
   line-height: 1.9;
   margin: 0;
   color: var(--muted);
@@ -1822,7 +1822,7 @@ h1 {
   justify-content: center;
   flex-direction: column;
   gap: 13px;
-  font-size: 12px;
+  font-size: var(--text-ui);
   position: relative;
   color: var(--muted);
 }
@@ -1849,16 +1849,16 @@ h1 {
   border-bottom: 1px solid var(--line);
 }
 .data-action h4 {
-  font-size: 13px;
+  font-size: var(--text-ui);
   margin: 0 0 6px;
 }
 .data-action p {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   margin: 0;
 }
 .data-action .button {
-  font-size: 10px;
+  font-size: var(--text-small);
   padding: 8px 10px;
 }
 .toasts {
@@ -1878,7 +1878,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
+  font-size: var(--text-ui);
   background: var(--surface);
   border: 1px solid #dcdcdc;
   border-radius: 9px;
@@ -1913,11 +1913,11 @@ h1 {
   stroke-width: 1.3;
 }
 .drop-overlay h2 {
-  font-family: 'Noto Serif SC Variable', Georgia, serif;
+  font-family: var(--font-ui);
   font-size: 25px;
 }
 .drop-overlay p {
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--muted);
 }
 .import-progress {
@@ -1933,11 +1933,11 @@ h1 {
   z-index: 180;
 }
 .import-progress .loading {
-  font-size: 12px;
+  font-size: var(--text-ui);
   padding: 17px 22px;
 }
 .help-steps p {
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--muted);
   margin-bottom: 21px;
 }
@@ -1964,7 +1964,7 @@ h1 {
   font-size: 24px;
 }
 .boot-error p {
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--muted);
 }
 .ai-page {
@@ -1972,13 +1972,13 @@ h1 {
   min-height: calc(100vh - 111px);
 }
 .ai-page > h1 {
-  font-family: 'Noto Serif SC Variable', Georgia, serif;
+  font-family: var(--font-ui);
   font-weight: 500;
   font-size: 31px;
   margin: 18px 0 14px;
 }
 .page-description {
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--muted);
 }
 .ai-workspace-banner {
@@ -2000,7 +2000,7 @@ h1 {
   margin-bottom: 8px;
 }
 .ai-workspace-banner p {
-  font-size: 11px;
+  font-size: var(--text-small);
   margin: 0;
   color: var(--muted);
 }
@@ -2010,7 +2010,7 @@ h1 {
   gap: 20px;
 }
 .job-grid > div > h4 {
-  font-size: 13px;
+  font-size: var(--text-ui);
   margin-bottom: 10px;
 }
 .reader-overlay {
@@ -2044,7 +2044,7 @@ h1 {
 }
 .reader-heading strong {
   display: block;
-  font-size: 13px;
+  font-size: var(--text-ui);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2052,7 +2052,7 @@ h1 {
 }
 .reader-heading > span {
   display: block;
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   margin-top: 5px;
 }
@@ -2062,7 +2062,7 @@ h1 {
   gap: 10px;
 }
 .reader-header .button {
-  font-size: 11px;
+  font-size: var(--text-small);
   min-height: 32px;
   padding: 8px 12px;
 }
@@ -2086,7 +2086,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
   border-bottom: 2px solid transparent;
   padding: 0 3px;
@@ -2099,11 +2099,11 @@ h1 {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .page-controls small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .zoom-controls {
   display: flex;
@@ -2112,7 +2112,7 @@ h1 {
   padding: 0 13px;
   border-left: 1px solid var(--line);
   border-right: 1px solid var(--line);
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .reader-body {
@@ -2131,7 +2131,7 @@ h1 {
   position: relative;
 }
 .demo-notice {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   text-align: center;
   margin: -11px 0 14px;
@@ -2147,7 +2147,7 @@ h1 {
   border-radius: 2px;
 }
 .reading-page-label {
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1.5px;
   color: var(--muted);
   display: flex;
@@ -2171,7 +2171,7 @@ h1 {
 .markdown h1,
 .markdown h2,
 .markdown h3 {
-  font-family: 'Noto Serif SC Variable', Georgia, serif;
+  font-family: var(--font-ui);
   line-height: 1.55;
   color: var(--ink);
   font-weight: 600;
@@ -2240,7 +2240,7 @@ h1 {
   display: block;
   overflow: auto;
   max-width: 100%;
-  font-size: 12px;
+  font-size: var(--text-ui);
   margin: 23px 0;
 }
 .markdown td,
@@ -2268,7 +2268,7 @@ h1 {
   padding: 5px 0;
 }
 .image-placeholder {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
   background: var(--hover);
   padding: 5px 10px;
@@ -2292,7 +2292,7 @@ h1 {
   border-bottom: 1px solid var(--line);
 }
 .side-tabs > button:not(.icon-button) {
-  font-size: 11px;
+  font-size: var(--text-small);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -2306,7 +2306,7 @@ h1 {
   border-bottom-color: var(--green) !important;
 }
 .side-tabs > button > span {
-  font-size: 9px;
+  font-size: var(--text-caption);
   background: var(--hover);
   padding: 2px 4px;
   border-radius: 4px;
@@ -2320,7 +2320,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin-bottom: 20px;
 }
@@ -2341,17 +2341,17 @@ h1 {
   color: var(--muted);
 }
 .annotations-empty h3 {
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--muted);
   margin-bottom: 10px;
 }
 .annotations-empty p {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   line-height: 2;
 }
 .side-content > .full-width {
-  font-size: 11px;
+  font-size: var(--text-small);
   margin-top: 20px;
 }
 .reader-side-footer {
@@ -2361,7 +2361,7 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   flex-shrink: 0;
 }
@@ -2373,12 +2373,12 @@ h1 {
   margin-bottom: 22px;
 }
 .annotation-compose .eyebrow {
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1px;
 }
 .annotation-compose blockquote {
   margin: 12px 0;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.8;
   max-height: 150px;
   overflow: auto;
@@ -2389,7 +2389,7 @@ h1 {
 }
 .annotation-compose textarea {
   width: 100%;
-  font-size: 11px;
+  font-size: var(--text-small);
   min-height: 83px;
   padding: 10px;
   resize: vertical;
@@ -2447,11 +2447,11 @@ h1 {
 }
 .annotation-card-meta > button:first-child {
   padding: 0;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .annotation-card blockquote {
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.7;
   margin: 6px 0 10px;
   color: var(--muted);
@@ -2460,7 +2460,7 @@ h1 {
   overflow-wrap: anywhere;
 }
 .annotation-card > p {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
   margin: 10px 0;
 }
@@ -2472,11 +2472,11 @@ h1 {
   padding-top: 8px;
 }
 .annotation-card-footer small {
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .annotation-card-footer .text-button {
-  font-size: 9px;
+  font-size: var(--text-caption);
 }
 .ai-side-intro {
   text-align: center;
@@ -2491,7 +2491,7 @@ h1 {
   margin-bottom: 7px;
 }
 .ai-side-intro p {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .ai-service {
@@ -2509,12 +2509,12 @@ h1 {
 }
 .ai-service > span:nth-child(2) {
   flex: 1;
-  font-size: 11px;
+  font-size: var(--text-small);
   overflow-wrap: anywhere;
 }
 .ai-service small {
   display: block;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin-top: 4px;
 }
@@ -2526,18 +2526,18 @@ h1 {
   color: var(--muted);
 }
 .ai-action-card h4 {
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--muted);
   margin: 10px 0 8px;
 }
 .ai-action-card p {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   line-height: 1.9;
   margin-bottom: 14px;
 }
 .ai-action-card .button {
-  font-size: 10px;
+  font-size: var(--text-small);
   justify-content: space-between;
   padding: 9px 12px;
 }
@@ -2553,7 +2553,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .job-heading > span {
@@ -2562,7 +2562,7 @@ h1 {
   gap: 7px;
 }
 .job-heading small {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .progress-track {
@@ -2580,7 +2580,7 @@ h1 {
   transition: width 0.4s;
 }
 .job-card > p {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin: 8px 0 12px;
   overflow-wrap: anywhere;
@@ -2593,7 +2593,7 @@ h1 {
   justify-content: space-between;
 }
 .job-actions .text-button {
-  font-size: 10px;
+  font-size: var(--text-small);
 }
 .reader-empty {
   min-height: 500px;
@@ -2624,11 +2624,11 @@ h1 {
   border-color: #c7c7c7;
 }
 .export-format b {
-  font-size: 13px;
+  font-size: var(--text-ui);
   font-weight: 500;
 }
 .export-format span {
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .pdf-wrapper {
@@ -2725,7 +2725,7 @@ h1 {
   color: inherit;
 }
 .error-box {
-  font-size: 12px;
+  font-size: var(--text-ui);
   border: 1px solid #c2c2c2;
   background: #f0f0f0;
   color: var(--muted);
@@ -2757,7 +2757,7 @@ h1 {
   padding: 0 7px;
 }
 .notes-sidebar-title .eyebrow {
-  font-size: 7px;
+  font-size: var(--text-caption);
   letter-spacing: 1.2px;
 }
 .notes-sidebar-title h1 {
@@ -2782,7 +2782,7 @@ h1 {
   background: none;
   padding: 10px 0;
   width: 100%;
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .notes-list {
   flex: 1;
@@ -2812,7 +2812,7 @@ h1 {
   margin-bottom: 11px;
 }
 .note-list-item small {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .note-list-item b {
@@ -2820,13 +2820,13 @@ h1 {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: 12px;
+  font-size: var(--text-ui);
   font-weight: 500;
   line-height: 1.6;
   color: var(--muted);
 }
 .note-list-item p {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
   line-height: 1.8;
   margin: 7px 0 0;
@@ -2838,7 +2838,7 @@ h1 {
 .note-import {
   width: 100%;
   margin-top: 13px;
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .note-editor {
   display: flex;
@@ -2860,7 +2860,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin-right: auto;
 }
@@ -2873,7 +2873,7 @@ h1 {
   padding: 3px;
 }
 .segmented > button {
-  font-size: 10px;
+  font-size: var(--text-small);
   padding: 5px 10px;
   color: var(--muted);
   border-radius: 4px;
@@ -2888,7 +2888,7 @@ h1 {
   border-bottom: 1px solid var(--line);
 }
 .note-title-area > input {
-  font-family: 'Noto Serif SC Variable', Georgia, serif;
+  font-family: var(--font-ui);
   font-size: 23px;
   font-weight: 500;
   border: 0;
@@ -2903,7 +2903,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
   margin-top: 13px;
   padding: 0;
@@ -2943,13 +2943,13 @@ h1 {
   border-radius: 0;
 }
 .pane-label {
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1px;
   color: var(--muted);
   margin-bottom: 20px;
 }
 .markdown-preview-pane .markdown {
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .note-statusbar {
   height: 31px;
@@ -2959,7 +2959,7 @@ h1 {
   justify-content: space-between;
   gap: 10px;
   padding: 0 22px;
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: var(--muted);
   flex-shrink: 0;
 }
@@ -2971,7 +2971,7 @@ h1 {
   background: #f5f5f5;
   border-bottom: 1px solid #dfdfdf;
   padding: 10px 20px;
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .inline-confirm > span {
@@ -2980,7 +2980,7 @@ h1 {
 .inline-confirm .button {
   min-height: 26px;
   padding: 5px 10px;
-  font-size: 10px;
+  font-size: var(--text-small);
 }
 .mobile-only {
   display: none;
@@ -3131,10 +3131,10 @@ h1 {
     z-index: 3;
   }
   .welcome p {
-    font-size: 10px;
+    font-size: var(--text-small);
   }
   .welcome-actions > span {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .overview-stat {
     margin-right: 13px;
@@ -3154,7 +3154,7 @@ h1 {
     height: 145px;
   }
   .paper-title {
-    font-size: 13px;
+    font-size: var(--text-ui);
     height: 39px;
   }
   .collection-cards {
@@ -3175,7 +3175,7 @@ h1 {
     gap: 7px;
   }
   .note-editor-toolbar .save-state {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .note-title-area {
     padding: 23px;
@@ -3194,10 +3194,10 @@ h1 {
     padding: 35px 38px;
   }
   .sidebar-section-label > span {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .ai-promo p {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
 }
 @media (max-width: 1020px) {
@@ -3217,7 +3217,7 @@ h1 {
     line-height: 1.9;
   }
   .welcome .eyebrow {
-    font-size: 8px;
+    font-size: var(--text-caption);
     letter-spacing: 1.7px;
   }
   .overview-stat {
@@ -3234,7 +3234,7 @@ h1 {
     font-size: 19px;
   }
   .overview-stat span {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .continue-reading {
     width: 30%;
@@ -3245,7 +3245,7 @@ h1 {
     display: none;
   }
   .continue-reading b {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .global-search input {
     width: 172px;
@@ -3291,10 +3291,10 @@ h1 {
     width: 20px;
   }
   .collection-card b {
-    font-size: 10px;
+    font-size: var(--text-small);
   }
   .collection-card small {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .collection-card > svg {
     display: none;
@@ -3314,7 +3314,7 @@ h1 {
     padding: 0 8px;
   }
   .reader-side {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .reading-paper {
     padding: 30px;
@@ -3393,7 +3393,7 @@ h1 {
   }
   .global-search input {
     width: 183px;
-    font-size: 10px;
+    font-size: var(--text-small);
   }
   .topbar-right {
     gap: 13px;
@@ -3415,7 +3415,7 @@ h1 {
     transform: scale(0.82);
   }
   .welcome p {
-    font-size: 10px;
+    font-size: var(--text-small);
     max-width: none;
   }
   .welcome-actions > span {
@@ -3435,7 +3435,7 @@ h1 {
     width: 30px;
   }
   .collection-card b {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .paper-art {
     height: 180px;
@@ -3487,7 +3487,7 @@ h1 {
     gap: 12px;
   }
   .reader-mode-tabs > button {
-    font-size: 10px;
+    font-size: var(--text-small);
     gap: 5px;
   }
   .zoom-controls {
@@ -3498,7 +3498,7 @@ h1 {
   }
   .page-controls {
     gap: 4px;
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .reader-scroll {
     padding: 24px;
@@ -3520,10 +3520,10 @@ h1 {
     left: 50%;
   }
   .global-search kbd {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .library-bottom {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .side-tabs .mobile-only {
     margin-left: auto;
@@ -3541,7 +3541,7 @@ h1 {
   }
   .global-search input {
     width: 143px;
-    font-size: 10px;
+    font-size: var(--text-small);
   }
   .global-search kbd {
     display: none;
@@ -3557,14 +3557,14 @@ h1 {
     height: 28px;
   }
   .breadcrumb {
-    font-size: 10px;
+    font-size: var(--text-small);
     gap: 5px;
   }
   .breadcrumb > svg {
     display: none;
   }
   .breadcrumb b {
-    font-size: 10px;
+    font-size: var(--text-small);
   }
   .main-content {
     padding: 19px 17px 0;
@@ -3585,7 +3585,7 @@ h1 {
   }
   .welcome p {
     max-width: 190px;
-    font-size: 9px;
+    font-size: var(--text-caption);
     line-height: 1.8;
     margin-bottom: 14px;
   }
@@ -3593,12 +3593,12 @@ h1 {
     display: none;
   }
   .welcome .eyebrow {
-    font-size: 7px;
+    font-size: var(--text-caption);
     letter-spacing: 1.2px;
   }
   .welcome-actions .button {
     min-height: 30px;
-    font-size: 10px;
+    font-size: var(--text-small);
     padding: 6px 10px;
   }
   .hero-illustration {
@@ -3633,7 +3633,7 @@ h1 {
     font-size: 20px;
   }
   .overview-stat span {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .stat-icon {
     width: 31px;
@@ -3662,12 +3662,12 @@ h1 {
     gap: 12px;
   }
   .continue-reading small {
-    font-size: 8px;
+    font-size: var(--text-caption);
     margin: 0;
     white-space: nowrap;
   }
   .continue-reading b {
-    font-size: 9px;
+    font-size: var(--text-caption);
     flex: 1;
   }
   .continue-reading button > svg {
@@ -3680,7 +3680,7 @@ h1 {
     font-size: 17px;
   }
   .section-heading p {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .library-toolbar {
     margin-bottom: 15px;
@@ -3692,7 +3692,7 @@ h1 {
     flex: 1;
   }
   .filter-tabs button {
-    font-size: 10px;
+    font-size: var(--text-small);
     padding: 10px 0;
   }
   .toolbar-actions {
@@ -3702,7 +3702,7 @@ h1 {
     display: none;
   }
   .sort-select select {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .sort-select {
     gap: 4px;
@@ -3744,7 +3744,7 @@ h1 {
     padding: 10px 11px 0;
   }
   .paper-title {
-    font-size: 11px;
+    font-size: var(--text-small);
     line-height: 1.55;
     height: 35px;
     letter-spacing: -0.1px;
@@ -3753,7 +3753,7 @@ h1 {
     margin-bottom: 6px;
   }
   .status {
-    font-size: 7px;
+    font-size: var(--text-caption);
     padding: 2px 4px;
   }
   .star-button {
@@ -3764,11 +3764,11 @@ h1 {
     width: 14px;
   }
   .paper-authors {
-    font-size: 8px;
+    font-size: var(--text-caption);
     margin: 7px 0 8px;
   }
   .tag {
-    font-size: 7px;
+    font-size: var(--text-caption);
     padding: 3px 4px;
     height: 17px;
   }
@@ -3777,7 +3777,7 @@ h1 {
     height: 22px;
   }
   .paper-footer {
-    font-size: 7px;
+    font-size: var(--text-caption);
     padding: 8px 0 9px;
     margin-top: 4px;
   }
@@ -3785,7 +3785,7 @@ h1 {
     gap: 4px;
   }
   .pdf-label {
-    font-size: 7px;
+    font-size: var(--text-caption);
     left: 8px;
     bottom: 8px;
     padding: 2px 4px;
@@ -3809,7 +3809,7 @@ h1 {
     flex-wrap: wrap;
     gap: 9px;
     margin-top: 14px;
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .collections-section {
     padding-top: 20px;
@@ -3836,24 +3836,24 @@ h1 {
   }
   .collection-card small {
     margin: 0;
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .collection-card b {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .folder-icon {
     height: 28px;
     width: 29px;
   }
   .section-heading.compact .subtle-text {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .page-footer {
     padding: 26px 0 21px;
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .small-brand {
-    font-size: 12px;
+    font-size: var(--text-ui);
   }
   .page-footer > span:nth-child(2) {
     letter-spacing: 0.5px;
@@ -3875,11 +3875,11 @@ h1 {
   }
   .papers-list .paper-title {
     grid-row: 2;
-    font-size: 11px;
+    font-size: var(--text-small);
     max-height: 34px;
   }
   .papers-list .paper-authors {
-    font-size: 8px;
+    font-size: var(--text-caption);
     grid-row: 3;
     margin: 1px 0;
   }
@@ -3910,13 +3910,13 @@ h1 {
     gap: 23px;
   }
   .settings-tabs > button {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .provider-options {
     gap: 5px;
   }
   .provider-options > button {
-    font-size: 9px;
+    font-size: var(--text-caption);
     height: 35px;
   }
   .provider-options > button > svg {
@@ -3929,7 +3929,7 @@ h1 {
     font-size: 14px;
   }
   .settings-intro p {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .settings-intro .feature-icon {
     width: 37px;
@@ -3939,12 +3939,12 @@ h1 {
     gap: 10px;
   }
   .field {
-    font-size: 10px;
+    font-size: var(--text-small);
   }
   .field input,
   .field select,
   .field textarea {
-    font-size: 11px;
+    font-size: var(--text-small);
     padding: 10px;
   }
   .input-with-icon > input {
@@ -3954,14 +3954,14 @@ h1 {
     gap: 7px;
   }
   .modal-actions > .button {
-    font-size: 10px;
+    font-size: var(--text-small);
     padding: 8px 11px;
   }
   .modal-actions > .text-button {
-    font-size: 10px;
+    font-size: var(--text-small);
   }
   .privacy-note p {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .data-action {
     align-items: flex-start;
@@ -3975,14 +3975,14 @@ h1 {
   }
   .theme-options > button {
     height: 100px;
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .toasts {
     right: 14px;
     bottom: 16px;
   }
   .toast {
-    font-size: 11px;
+    font-size: var(--text-small);
     padding: 12px 14px;
   }
   .reader-header {
@@ -3994,10 +3994,10 @@ h1 {
     display: none;
   }
   .reader-heading strong {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .reader-heading > span {
-    font-size: 8px;
+    font-size: var(--text-caption);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -4029,7 +4029,7 @@ h1 {
     gap: 8px;
   }
   .reader-mode-tabs > button {
-    font-size: 9px;
+    font-size: var(--text-caption);
     gap: 4px;
     padding: 0;
   }
@@ -4038,10 +4038,10 @@ h1 {
   }
   .page-controls {
     gap: 1px;
-    font-size: 10px;
+    font-size: var(--text-small);
   }
   .page-controls small {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .page-controls .icon-button {
     width: 22px;
@@ -4063,14 +4063,14 @@ h1 {
     min-height: 670px;
   }
   .reading-paper .markdown {
-    font-size: 12px;
+    font-size: var(--text-ui);
   }
   .reading-page-label {
-    font-size: 7px;
+    font-size: var(--text-caption);
     margin-bottom: 25px;
   }
   .demo-notice {
-    font-size: 8px;
+    font-size: var(--text-caption);
     margin-top: -6px;
   }
   .pdf-wrapper {
@@ -4085,7 +4085,7 @@ h1 {
     gap: 7px;
   }
   .export-format span {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .notes-page {
     display: block;
@@ -4128,11 +4128,11 @@ h1 {
     padding: 17px 23px;
   }
   .markdown-edit-pane textarea {
-    font-size: 12px;
+    font-size: var(--text-ui);
   }
   .note-statusbar {
     padding: 0 15px;
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .note-statusbar > span:last-child {
     max-width: 200px;
@@ -4147,7 +4147,7 @@ h1 {
     margin: 13px 0;
   }
   .page-description {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .ai-workspace-banner {
     padding: 22px 19px;
@@ -4164,10 +4164,10 @@ h1 {
     font-size: 14px;
   }
   .ai-workspace-banner p {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .ai-workspace-banner .button {
-    font-size: 11px;
+    font-size: var(--text-small);
     width: 100%;
     margin: 5px 0 0;
   }
@@ -4178,7 +4178,7 @@ h1 {
     width: 90vw;
   }
   .import-progress .loading {
-    font-size: 10px;
+    font-size: var(--text-small);
     line-height: 1.8;
   }
   .drop-overlay h2 {
@@ -4229,7 +4229,7 @@ h1 {
   height: 27px;
   padding: 2px 3px;
   text-align: center;
-  font-size: 11px;
+  font-size: var(--text-small);
   border: 1px solid var(--line);
   border-radius: 4px;
   background: var(--bg);
@@ -4254,7 +4254,7 @@ h1 {
   display: flex;
   gap: 10px;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--text-ui);
   margin: 14px 0;
 }
 .credential-option input {
@@ -4270,7 +4270,7 @@ h1 {
 }
 .ai-advanced summary {
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--text-ui);
   font-weight: 600;
 }
 .ai-advanced .form-two {
@@ -4281,17 +4281,17 @@ h1 {
   justify-content: space-between;
   gap: 12px;
   margin-top: 16px;
-  font-size: 13px;
+  font-size: var(--text-ui);
 }
 .job-card .job-endpoint {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: var(--text-small);
   opacity: 0.75;
 }
 .job-card .job-live {
-  font-size: 12px;
+  font-size: var(--text-ui);
   line-height: 1.8;
   color: var(--green);
 }
@@ -4301,12 +4301,12 @@ h1 {
 .document-mode-label {
   margin-left: auto;
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--text-ui);
   white-space: nowrap;
 }
 .document-progress-note {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-ui);
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid var(--line);
@@ -4329,7 +4329,7 @@ h1 {
   align-items: center;
   gap: 8px;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .bulk-toolbar input,
 .paper-checkbox input {
@@ -4348,7 +4348,7 @@ h1 {
   display: flex;
   gap: 6px;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .bulk-status select {
   max-width: 105px;
@@ -4423,7 +4423,7 @@ h1 {
   border: 0;
   border-radius: 6px;
   background: transparent;
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .paper-menu button:hover,
 .paper-menu button:focus-visible {
@@ -4437,7 +4437,7 @@ h1 {
   padding-right: 85px;
 }
 .trash-page h1 {
-  font-family: 'Noto Serif SC Variable', serif;
+  font-family: var(--font-ui);
   font-size: 32px;
   margin: 12px 0;
 }
@@ -4468,7 +4468,7 @@ h1 {
 }
 .trash-info p {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--text-ui);
   margin: 0;
   overflow-wrap: anywhere;
 }
@@ -4482,7 +4482,7 @@ h1 {
   padding: 14px 20px;
   background: #6c6c6c10;
   border-bottom: 1px solid #6c6c6c40;
-  font-size: 13px;
+  font-size: var(--text-ui);
 }
 .draft-error > div {
   flex: 1;
@@ -4532,7 +4532,7 @@ h1 {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--text-ui);
   line-height: 1.7;
   margin: 14px 0 8px;
   cursor: pointer;
@@ -4560,7 +4560,7 @@ h1 {
 .navigation-tabs button {
   flex: 1;
   padding: 10px 4px;
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--muted);
 }
 .navigation-tabs button.active {
@@ -4571,7 +4571,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--muted);
 }
 .search-summary > span {
@@ -4591,7 +4591,7 @@ h1 {
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  font-size: 12px;
+  font-size: var(--text-ui);
   overflow-wrap: anywhere;
 }
 .search-match.active {
@@ -4601,7 +4601,7 @@ h1 {
 .search-match small,
 .outline-entry small,
 .bookmark-row small {
-  font-size: 10px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .outline-entry {
@@ -4622,7 +4622,7 @@ h1 {
   display: grid;
   gap: 6px;
   overflow-wrap: anywhere;
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .annotation-filters {
   display: grid;
@@ -4634,7 +4634,7 @@ h1 {
   min-width: 0;
   width: 100%;
   padding: 9px;
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .result-editor-panes {
   display: grid;
@@ -4648,7 +4648,7 @@ h1 {
   resize: none;
   padding: 15px;
   font-family: Consolas, monospace;
-  font-size: 13px;
+  font-size: var(--text-ui);
   line-height: 1.8;
 }
 .result-preview {
@@ -4658,7 +4658,7 @@ h1 {
   padding: 18px;
 }
 .result-preview .markdown {
-  font-size: 13px;
+  font-size: var(--text-ui);
 }
 .result-actions {
   display: flex;
@@ -4671,7 +4671,7 @@ h1 {
 }
 .result-version-name {
   display: block;
-  font-size: 12px;
+  font-size: var(--text-ui);
   margin-bottom: 10px;
   overflow-wrap: anywhere;
 }
@@ -4740,6 +4740,6 @@ h1 {
 }
 .parallel-preview summary {
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--muted);
 }

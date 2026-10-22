@@ -2,11 +2,11 @@
 
 **让阅读，沉淀为知识。** 一个使用 Tauri 2、React 19 与 TypeScript 构建的本地优先论文阅读工作台。
 
-这是可运行的 **0.1.9 测试版**：参照 Fluent 2 与 Radix 重新整理黑白灰层级，统一蓝色交互强调，保留分类颜色与状态语义；浅色、深色各自配置，增强辅助文字对比度。配色依据与测量结果见 [配色设计](docs/COLOR-SYSTEM.md)。支持可收起侧栏、文献标签页，以及融合系统窗口控制的顶栏。保留 DeepSeek V4 首字等待优化、双栏分段、Markdown 标题与 LaTeX 公式保护、并行批次即时预览，以及 PDF／Word 导出、快照、引用管理、Markdown 笔记、离线 OCR 和视觉解析。本轮已生成 Windows、Android ARM64 与 macOS 通用版测试安装包。Android 和 macOS 仍需用户设备上的完整使用验收，iOS 尚未打包。不包含 WebDAV 或云同步。
+这是可运行的 **0.1.10 测试版**：统一阅读器、笔记和设置页的配色、字号与间距；正文采用桌面 18px / 窄屏 17px，编辑区 16px，控件 14–16px，说明 13px。沿用黑白灰与蓝色交互角色，修正深色服务商选中态和笔记页底部布局。规范依据见 [字号与间距](docs/TYPOGRAPHY.md) 和 [配色设计](docs/COLOR-SYSTEM.md)。支持可收起侧栏、文献标签页，以及融合系统窗口控制的顶栏。保留 DeepSeek V4 首字等待优化、双栏分段、Markdown 标题与 LaTeX 公式保护、并行批次即时预览，以及 PDF／Word 导出、快照、引用管理、Markdown 笔记、离线 OCR 和视觉解析。本轮已生成 Windows、Android ARM64 与 macOS 通用版测试安装包。Android 和 macOS 仍需用户设备上的完整使用验收，iOS 尚未打包。不包含 WebDAV 或云同步。
 
-Android 测试包：`release/Paperead_0.1.9_Android-arm64-test.apk`（release 优化、测试签名，最低 API 26）。macOS 测试包：`release/Paperead_0.1.9_macOS-universal.dmg`（Apple Silicon / Intel，ad-hoc 签名，未公证）。安装与构建说明见 [原生平台文档](docs/NATIVE-PLATFORMS.md)；macOS 产物也可从 [GitHub Actions](https://github.com/Mclarenlife/Paperead/actions/workflows/macos-installer.yml) 下载。
+Android 测试包：`release/Paperead_0.1.10_Android-arm64-test.apk`（release 优化、测试签名，最低 API 26）。macOS 测试包：`release/Paperead_0.1.10_macOS-universal.dmg`（Apple Silicon / Intel，ad-hoc 签名，未公证）。安装与构建说明见 [原生平台文档](docs/NATIVE-PLATFORMS.md)；macOS 产物也可从 [GitHub Actions](https://github.com/Mclarenlife/Paperead/actions/workflows/macos-installer.yml) 下载。
 
-Windows 安装包：`release/Paperead_0.1.9_x64-setup.exe`（未签名开发版）。关闭旧版后运行安装包升级，资料保留；旧译文需点击“使用当前配置重新处理”应用新的分段和公式保护。缺少 WebView2 时需要联网安装运行时。详见 [本次修复与验收](docs/AI-0.1.6.md)、[Windows 打包](docs/WINDOWS-BUILD.md)、[其他平台](docs/NATIVE-PLATFORMS.md)。
+Windows 安装包：`release/Paperead_0.1.10_x64-setup.exe`（未签名开发版）。关闭旧版后运行安装包升级，资料保留；旧译文需点击“使用当前配置重新处理”应用新的分段和公式保护。缺少 WebView2 时需要联网安装运行时。详见 [本次修复与验收](docs/AI-0.1.6.md)、[Windows 打包](docs/WINDOWS-BUILD.md)、[其他平台](docs/NATIVE-PLATFORMS.md)。
 
 每轮代码或界面修改验证后重新生成测试包，保留旧包；只使用本地安装包及 Actions 临时构建产物，不发布 GitHub Release。详见 [项目交付约定](AGENTS.md)。
 
@@ -108,6 +108,7 @@ src/
   styles.css        组件与响应式样式
   workspace.css     侧栏、标签页与窗口布局
   palette.css       浅色与深色的颜色角色
+  typography.css    跨页面字号、字体与间距角色
 src-tauri/          Rust 入口、四端图标、权限与打包配置
 scripts/           PDF 资源准备、截图检查
 tests/             单元测试与真实浏览器流程

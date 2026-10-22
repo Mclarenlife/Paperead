@@ -37,7 +37,7 @@
   align-items: center;
   gap: 9px;
   padding: 0 14px;
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--muted);
   min-width: 110px;
   max-width: 210px;
@@ -99,7 +99,7 @@
   justify-content: end;
   padding: 0 20px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .window-controls {
   display: flex;
