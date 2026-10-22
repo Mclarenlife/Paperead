@@ -383,7 +383,7 @@ function Workspace() {
                     className={scope === `collection:${c.id}` ? 'active' : ''}
                     onClick={() => navigate(`collection:${c.id}`)}
                   >
-                    <FolderOpen size={17} />
+                    <FolderOpen size={17} style={{ color: c.color }} />
                     <span>{c.name}</span>
                     <small>{papers.filter((p) => p.collectionId === c.id).length}</small>
                   </button>

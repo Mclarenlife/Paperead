@@ -672,7 +672,7 @@ export function Library({
                 key={c.id}
                 onClick={() => onScope(`collection:${c.id}`)}
               >
-                <span className="folder-icon">
+                <span className="folder-icon" style={{ color: c.color }}>
                   <FolderOpen size={23} />
                 </span>
                 <span>

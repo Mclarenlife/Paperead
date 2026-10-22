@@ -1,4 +1,4 @@
-/* Workspace chrome uses neutral surfaces; document and annotation colors stay intact. */
+/* Neutral workspace surfaces with restrained accents for navigation and meaning. */
 :root {
   --bg: #fafafa;
   --surface: #fff;
@@ -6,8 +6,16 @@
   --ink: #202020;
   --muted: #777;
   --line: #e5e5e5;
-  --green: #242424;
-  --green-light: #eaeaea;
+  --green: #50758c;
+  --green-light: #eaf1f5;
+  --accent: #50758c;
+  --accent-soft: #eaf1f5;
+  --success: #527a64;
+  --success-soft: #edf4ef;
+  --warning: #9b7845;
+  --warning-soft: #faf2e6;
+  --danger: #b25c58;
+  --danger-soft: #fbefee;
   --hover: #efefef;
   --paper: #fff;
   --shadow: 0 6px 26px #0000000a;
@@ -20,8 +28,16 @@
   --ink: #e8e8e8;
   --muted: #999;
   --line: #303030;
-  --green: #e8e8e8;
-  --green-light: #303030;
+  --green: #9bbcd0;
+  --green-light: #25323b;
+  --accent: #9bbcd0;
+  --accent-soft: #25323b;
+  --success: #9abeaa;
+  --success-soft: #25342c;
+  --warning: #d3b47d;
+  --warning-soft: #393124;
+  --danger: #dfa09b;
+  --danger-soft: #3c2829;
   --hover: #282828;
   --paper: #202020;
   --shadow: 0 6px 26px #0003;
@@ -250,6 +266,126 @@
 }
 .breadcrumb b {
   color: var(--ink);
+}
+/* Color guides attention; primary surfaces and primary actions stay neutral. */
+.main-navigation > button.active,
+.collection-navigation > button.active,
+[data-theme='dark'] .main-navigation > button.active,
+[data-theme='dark'] .collection-navigation > button.active {
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+.main-navigation > button.active > svg,
+.workspace-tab[aria-selected='true'] > svg,
+.sidebar-settings:hover > svg {
+  color: var(--accent);
+}
+.main-navigation .active small {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+.workspace-tabs > .active,
+.document-tab.active {
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--accent) 65%, var(--surface));
+}
+.stat-icon {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.stat-icon.lilac {
+  color: #8d7ba6;
+  background: #f1edf6;
+}
+.stat-icon.amber {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+[data-theme='dark'] .stat-icon {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+[data-theme='dark'] .stat-icon.lilac {
+  color: #bdacd2;
+  background: #302b3a;
+}
+[data-theme='dark'] .stat-icon.amber {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+.art-sage {
+  background: #e9eeeb;
+  --cover-ink: #769183;
+}
+.art-lavender {
+  background: #eeecf2;
+  --cover-ink: #9888ac;
+}
+.art-sand {
+  background: #f1ede5;
+  --cover-ink: #b39b77;
+}
+.art-blue {
+  background: #e9eef3;
+  --cover-ink: #829bb2;
+}
+.art-rose {
+  background: #f2eaea;
+  --cover-ink: #b39194;
+}
+.art-olive {
+  background: #eef0e7;
+  --cover-ink: #9ca783;
+}
+.status-reading,
+[data-theme='dark'] .status-reading {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.status-finished,
+[data-theme='dark'] .status-finished {
+  color: var(--success);
+  background: var(--success-soft);
+}
+.online-dot {
+  background: var(--success);
+}
+.star-button.starred {
+  color: var(--warning);
+}
+.markdown a {
+  color: var(--accent);
+}
+.filter-tabs > button.active:after {
+  background: var(--accent);
+}
+.paper-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+button:focus-visible,
+a:focus-visible {
+  outline-color: var(--accent);
+}
+.button.danger,
+.toast-error,
+.error-box,
+.draft-error {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 28%, var(--surface));
+}
+.danger-text {
+  color: var(--danger) !important;
+}
+.window-controls .window-close:hover {
+  background: #bd504e;
+  color: white;
 }
 @media (max-width: 1020px) and (min-width: 781px) {
   .app:not(.sidebar-collapsed) {

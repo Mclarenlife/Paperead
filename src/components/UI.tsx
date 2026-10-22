@@ -60,7 +60,7 @@ export function Modal({
     return () => {
       document.removeEventListener('keydown', handler)
       document.body.style.overflow = old
-      previous?.focus()
+      previous?.focus({ preventScroll: true })
     }
   }, [])
   return (

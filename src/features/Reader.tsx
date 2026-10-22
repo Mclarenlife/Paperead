@@ -293,7 +293,7 @@ export function Reader({
     document.querySelector<HTMLElement>('.reader-overlay')?.focus()
     return () => {
       document.body.style.overflow = previousOverflow
-      previousFocus?.focus()
+      previousFocus?.focus({ preventScroll: true })
     }
   }, [])
 

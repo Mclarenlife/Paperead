@@ -1,5 +1,7 @@
 # 项目交付约定
 
+- UI 以黑白为基调，保留克制的彩色点缀、分类颜色和状态语义；不要把整个界面强制去色。
+
 - 每轮代码或界面修改完成并验证后，重新打包 Windows、Android 和 macOS 测试安装包，供用户真机测试。
 - 更新测试版本号，保持 package.json、Cargo.toml、Cargo.lock、Tauri 配置和设置页版本一致；保留旧测试包。
 - 将安装包和 SHA-256 校验文件保存到本地 release/。macOS 可以使用已配置的 GitHub Actions 构建，下载其构建产物到本地。

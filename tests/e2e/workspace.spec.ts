@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test('monochrome workspace, persistent sidebar and document tabs', async ({ page }) => {
+test('neutral workspace with accents, persistent sidebar and document tabs', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('.paper-card')).toHaveCount(6)
   await expect(page.locator('.welcome')).toHaveCount(0)
@@ -24,12 +24,13 @@ test('monochrome workspace, persistent sidebar and document tabs', async ({ page
   await page.locator('.document-tab.active .tab-close').click()
   await expect(page.locator('.document-tab')).toHaveCount(1)
   await page.getByRole('tab', { name: '文献库', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => window.scrollX)).toBe(0)
   await page.screenshot({ path: '.tmp/redesign-library.png', fullPage: true })
   const colors = await page.evaluate(() => {
     const style = getComputedStyle(document.documentElement)
     return ['--bg', '--sidebar', '--green'].map((name) => style.getPropertyValue(name).trim())
   })
-  expect(colors).toEqual(['#fafafa', '#f5f5f5', '#242424'])
+  expect(colors).toEqual(['#fafafa', '#f5f5f5', '#50758c'])
   await page.getByRole('button', { name: '偏好设置', exact: true }).click()
   await page.getByRole('button', { name: '外观', exact: true }).click()
   await page.getByRole('button', { name: '夜读', exact: true }).click()
