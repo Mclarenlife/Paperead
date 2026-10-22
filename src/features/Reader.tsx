@@ -291,31 +291,8 @@ export function Reader({
     const previousFocus = document.activeElement as HTMLElement | null
     document.body.style.overflow = 'hidden'
     document.querySelector<HTMLElement>('.reader-overlay')?.focus()
-    const trap = (event: KeyboardEvent) => {
-      if (event.key !== 'Tab' || document.querySelector('.modal-backdrop')) return
-      const root = document.querySelector<HTMLElement>('.reader-overlay')
-      const controls = Array.from(
-        root?.querySelectorAll<HTMLElement>(
-          'button:not(:disabled),input,textarea,select,a[href]',
-        ) || [],
-      ).filter((el) => el.offsetParent !== null)
-      const first = controls[0],
-        last = controls.at(-1)
-      if (event.shiftKey && (document.activeElement === first || document.activeElement === root)) {
-        event.preventDefault()
-        last?.focus()
-      } else if (
-        !event.shiftKey &&
-        (document.activeElement === last || document.activeElement === root)
-      ) {
-        event.preventDefault()
-        first?.focus()
-      }
-    }
-    document.addEventListener('keydown', trap)
     return () => {
       document.body.style.overflow = previousOverflow
-      document.removeEventListener('keydown', trap)
       previousFocus?.focus()
     }
   }, [])
@@ -533,8 +510,7 @@ export function Reader({
     )
   return (
     <motion.div
-      role="dialog"
-      aria-modal="true"
+      role="region"
       aria-label="文献阅读器"
       tabIndex={-1}
       className="reader-overlay"

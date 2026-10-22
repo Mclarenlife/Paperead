@@ -39,6 +39,7 @@ import {
 } from './components/UI'
 import type { AISettings } from './types'
 import { BackupRuntime } from './components/BackupRuntime'
+import { WorkspaceBar } from './components/WorkspaceBar'
 
 const Notes = lazy(() => import('./features/Notes').then((m) => ({ default: m.Notes })))
 const Reader = lazy(() => import('./features/Reader').then((m) => ({ default: m.Reader })))
@@ -55,6 +56,10 @@ export default function App() {
 }
 function Workspace() {
   const guard = useNavigationGuard()
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => localStorage.getItem('paperead.sidebar-collapsed') === 'true',
+  )
+  const [paperTabs, setPaperTabs] = useState<string[]>([])
   const [otherWindow, setOtherWindow] = useState(false)
   const [ready, setReady] = useState(false),
     [fatal, setFatal] = useState(''),
@@ -81,6 +86,9 @@ function Workspace() {
     collections = useLiveQuery(() => db.collections.toArray(), [], []),
     allJobs = useLiveQuery(() => db.jobs.toArray(), [], [])
   const jobs = allJobs.filter((job) => papers.some((paper) => paper.id === job.paperId))
+  useEffect(() => {
+    if (readerId) setPaperTabs((tabs) => (tabs.includes(readerId) ? tabs : [...tabs, readerId]))
+  }, [readerId])
   const toast = useCallback((message: string, error = false, action?: ToastAction) => {
     const id = Date.now() + Math.random()
     setToasts((items) => [...items.slice(-3), { id, message, error, action }])
@@ -181,6 +189,8 @@ function Workspace() {
   const navigate = (next: string) => {
     guard.navigate(() => {
       setScope(next)
+      setReaderId('')
+      setReaderJobId('')
       setSearch('')
       setMobileNav(false)
     })
@@ -193,6 +203,15 @@ function Workspace() {
     setReaderId('')
     setReaderJobId('')
   }, [])
+  const closeTab = (id: string) =>
+    guard.navigate(() => {
+      const remaining = paperTabs.filter((tab) => tab !== id)
+      setPaperTabs(remaining)
+      if (readerId === id) {
+        setReaderId(remaining.at(-1) || '')
+        setReaderJobId('')
+      }
+    })
   const openPaper = (id: string) => {
     if (!papers.some((paper) => paper.id === id)) {
       toast('文献在回收站中，请先恢复。')
@@ -201,6 +220,7 @@ function Workspace() {
     guard.navigate(() => {
       setReaderJobId('')
       setReaderId(id)
+      setMobileNav(false)
     })
   }
   const closeSettings = useCallback(() => setSettingsOpen(false), [])
@@ -242,7 +262,7 @@ function Workspace() {
           }
         >
           <div
-            className="app"
+            className={`app ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
             onDragEnter={(e) => {
               if (!e.dataTransfer.types.includes('Files')) return
               e.preventDefault()
@@ -264,8 +284,40 @@ function Workspace() {
               void handleFiles(Array.from(e.dataTransfer.files))
             }}
           >
+            <WorkspaceBar
+              navigationOpen={mobileNav}
+              collapsed={sidebarCollapsed}
+              onToggle={() => {
+                if (window.matchMedia('(max-width: 780px)').matches) {
+                  setMobileNav((value) => !value)
+                  return
+                }
+                setSidebarCollapsed((value) => {
+                  localStorage.setItem('paperead.sidebar-collapsed', String(!value))
+                  return !value
+                })
+              }}
+              tabs={paperTabs.flatMap((id) => {
+                const paper = papers.find((p) => p.id === id)
+                return paper ? [{ id, title: paper.title }] : []
+              })}
+              active={readerId}
+              workspace={
+                scope === 'notes'
+                  ? '我的笔记'
+                  : scope === 'ai'
+                    ? 'AI 工作台'
+                    : scope === 'trash'
+                      ? '回收站'
+                      : '文献库'
+              }
+              onWorkspace={() => guard.navigate(closeReader)}
+              onSelect={openPaper}
+              onClose={closeTab}
+              onError={(message) => toast(message, true)}
+            />
             {mobileNav && <div className="sidebar-scrim" onClick={() => setMobileNav(false)} />}
-            <aside inert={!!readerId} className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
+            <aside className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
               <button
                 className="brand"
                 onClick={() => navigate('library')}
@@ -300,6 +352,8 @@ function Workspace() {
                   return (
                     <button
                       key={k as string}
+                      title={t as string}
+                      aria-label={t as string}
                       className={scope === k ? 'active' : ''}
                       onClick={() => navigate(k as string)}
                     >
@@ -324,35 +378,42 @@ function Workspace() {
                 {collections.map((c) => (
                   <button
                     key={c.id}
+                    title={c.name}
+                    aria-label={c.name}
                     className={scope === `collection:${c.id}` ? 'active' : ''}
                     onClick={() => navigate(`collection:${c.id}`)}
                   >
-                    <FolderOpen size={17} style={{ color: c.color }} />
+                    <FolderOpen size={17} />
                     <span>{c.name}</span>
                     <small>{papers.filter((p) => p.collectionId === c.id).length}</small>
                   </button>
                 ))}
-                <button className="new-collection" onClick={() => setCollectionOpen(true)}>
+                <button
+                  className="new-collection"
+                  title="新建文献集"
+                  aria-label="新建文献集"
+                  onClick={() => setCollectionOpen(true)}
+                >
                   <Plus size={16} />
                   <span>新建文献集</span>
                 </button>
               </nav>
               <div className="sidebar-bottom">
                 <button
-                  className={`ai-promo ${scope === 'ai' ? 'selected' : ''}`}
+                  className="sidebar-settings"
+                  title="AI 工作台"
+                  aria-label="AI 工作台"
                   onClick={() => navigate('ai')}
                 >
-                  <span className="ai-promo-title">
-                    <Sparkles size={17} />
-                    <b>为阅读，加一点 AI</b>
-                    <span className="mini-badge">AI</span>
-                  </span>
-                  <p>翻译、重排，跨越理解的边界。</p>
-                  <span className="ai-promo-link">
-                    探索 AI 工作台 <ArrowRight size={14} />
-                  </span>
+                  <Sparkles size={17} />
+                  <span>AI 工作台</span>
                 </button>
-                <button className="sidebar-settings" onClick={() => setSettingsOpen(true)}>
+                <button
+                  className="sidebar-settings"
+                  title="偏好设置"
+                  aria-label="偏好设置"
+                  onClick={() => setSettingsOpen(true)}
+                >
                   <Settings2 size={17} />
                   <span>偏好设置</span>
                   <span className="shortcut">⌘ ,</span>
@@ -516,22 +577,22 @@ function Workspace() {
                 void handleFiles(files)
               }}
             />
+            {readerId && (
+              <Reader
+                key={readerId}
+                id={readerId}
+                initialJobId={readerJobId}
+                config={config}
+                onClose={closeReader}
+                onSettings={() => setSettingsOpen(true)}
+                onNote={(id) => {
+                  setNoteId(id)
+                  setReaderId('')
+                  setScope('notes')
+                }}
+              />
+            )}
             <AnimatePresence>
-              {readerId && (
-                <Reader
-                  key={readerId}
-                  id={readerId}
-                  initialJobId={readerJobId}
-                  config={config}
-                  onClose={closeReader}
-                  onSettings={() => setSettingsOpen(true)}
-                  onNote={(id) => {
-                    setNoteId(id)
-                    setReaderId('')
-                    setScope('notes')
-                  }}
-                />
-              )}{' '}
               {settingsOpen && (
                 <Settings
                   config={config}

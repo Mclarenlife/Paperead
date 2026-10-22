@@ -373,7 +373,7 @@ test('bilingual PDF becomes one Markdown with paragraph quotes, document annotat
   expect(sources[1].text).toContain('Methods and Results')
   await expect(page.locator('.reading-paper')).toContainText('Continuous reflow')
   await page.reload()
-  await page.getByRole('button', { name: '探索 AI 工作台', exact: false }).click()
+  await page.getByRole('button', { name: 'AI 工作台', exact: true }).click()
   await page
     .locator('.job-card')
     .filter({ hasText: '智能翻译' })
@@ -412,7 +412,7 @@ test('mobile library and notes stay inside the viewport; theme persists', async 
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await expect(page.locator('.paper-card').last()).toHaveCSS('opacity', '1')
-  await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(27, 35, 31)')
+  await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(18, 18, 18)')
   await page.evaluate(() => document.fonts.ready)
   await page.screenshot({
     path: '.tmp/library-dark-mobile.png',

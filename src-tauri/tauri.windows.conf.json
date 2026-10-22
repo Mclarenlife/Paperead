@@ -3,7 +3,10 @@
   "bundle": {
     "targets": ["nsis"],
     "windows": {
-      "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
       "nsis": {
         "installMode": "currentUser",
         "languages": ["SimpChinese", "English"],
@@ -12,5 +15,19 @@
         "installerIcon": "icons/icon.ico"
       }
     }
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Paperead",
+        "width": 1440,
+        "height": 960,
+        "minWidth": 350,
+        "minHeight": 600,
+        "dragDropEnabled": false,
+        "decorations": false
+      }
+    ]
   }
 }

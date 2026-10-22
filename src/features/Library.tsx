@@ -247,51 +247,6 @@ export function Library({
     <motion.div className="library-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {scope === 'library' && !search && (
         <>
-          <section className="welcome">
-            <div>
-              <div className="eyebrow">
-                <span /> YOUR SPACE TO THINK
-              </div>
-              <h1>
-                让阅读，<span>沉淀为知识。</span>
-              </h1>
-              <p>收藏值得读的论文，连接每一个值得记下的想法。</p>
-              <div className="welcome-actions">
-                <button className="button primary" onClick={onImport}>
-                  <Plus size={16} />
-                  导入文献
-                </button>
-                <span>留一点时间，给新的发现。</span>
-              </div>
-            </div>
-            <div className="hero-illustration" aria-hidden="true">
-              <div className="orbit orbit-one" />
-              <div className="orbit orbit-two" />
-              <div className="hero-dot" />
-              <div className="floating-note">
-                <Sparkles size={16} />
-                <span>
-                  A little clarity,
-                  <br />a new perspective.
-                </span>
-              </div>
-              <div className="hero-book book-back" />
-              <div className="hero-book book-front">
-                <div className="book-spine" />
-                <span className="book-mark">p.</span>
-                <span className="book-label">
-                  READ.
-                  <br />
-                  REFLECT.
-                  <br />
-                  CONNECT.
-                </span>
-                <div className="book-line" />
-                <span className="book-bottom">A SPACE FOR YOUR IDEAS</span>
-              </div>
-              <span className="hero-plus">+</span>
-            </div>
-          </section>
           <div className="overview-row">
             <div className="overview-stat">
               <div className="stat-icon">
@@ -717,7 +672,7 @@ export function Library({
                 key={c.id}
                 onClick={() => onScope(`collection:${c.id}`)}
               >
-                <span className="folder-icon" style={{ color: c.color }}>
+                <span className="folder-icon">
                   <FolderOpen size={23} />
                 </span>
                 <span>

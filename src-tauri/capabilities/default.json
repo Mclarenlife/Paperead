@@ -18,15 +18,32 @@
     "fs:allow-stat",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "$APPLOCALDATA/backups" }, { "path": "$APPLOCALDATA/backups/**" }]
+      "allow": [
+        {
+          "path": "$APPLOCALDATA/backups"
+        },
+        {
+          "path": "$APPLOCALDATA/backups/**"
+        }
+      ]
     },
     {
       "identifier": "http:default",
       "allow": [
-        { "url": "https://**" },
-        { "url": "http://localhost:*/*" },
-        { "url": "http://127.0.0.1:*/*" }
+        {
+          "url": "https://**"
+        },
+        {
+          "url": "http://localhost:*/*"
+        },
+        {
+          "url": "http://127.0.0.1:*/*"
+        }
       ]
-    }
+    },
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "core:window:allow-is-maximized"
   ]
 }
