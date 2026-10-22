@@ -2713,16 +2713,16 @@ h1 {
   border-radius: 1px;
 }
 ::highlight(paper-yellow) {
-  background: #d7d7d799;
-  color: inherit;
+  background: #f5d86b;
+  color: #202020;
 }
 ::highlight(paper-green) {
-  background: #c8c8c899;
-  color: inherit;
+  background: #91d7b2;
+  color: #202020;
 }
 ::highlight(paper-purple) {
-  background: #bcbcbc99;
-  color: inherit;
+  background: #c2acf0;
+  color: #202020;
 }
 .error-box {
   font-size: var(--text-ui);
