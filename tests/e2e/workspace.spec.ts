@@ -25,17 +25,21 @@ test('neutral workspace with accents, persistent sidebar and document tabs', asy
   await expect(page.locator('.document-tab')).toHaveCount(1)
   await page.getByRole('tab', { name: '文献库', exact: true }).click()
   await expect.poll(() => page.evaluate(() => window.scrollX)).toBe(0)
-  await page.screenshot({ path: '.tmp/redesign-library.png', fullPage: true })
+  await page.screenshot({
+    path: '.tmp/redesign-library.png',
+    fullPage: true,
+    animations: 'disabled',
+  })
   const colors = await page.evaluate(() => {
     const style = getComputedStyle(document.documentElement)
-    return ['--bg', '--sidebar', '--green'].map((name) => style.getPropertyValue(name).trim())
+    return ['--accent', '--success', '--danger'].map((name) => style.getPropertyValue(name).trim())
   })
-  expect(colors).toEqual(['#fafafa', '#f5f5f5', '#50758c'])
+  expect(colors).toEqual(['#0d74ce', '#18794e', '#ce2c31'])
   await page.getByRole('button', { name: '偏好设置', exact: true }).click()
   await page.getByRole('button', { name: '外观', exact: true }).click()
   await page.getByRole('button', { name: '夜读', exact: true }).click()
   await page.getByRole('button', { name: '关闭', exact: true }).click()
-  await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(18, 18, 18)')
+  await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(17, 17, 17)')
   await page.screenshot({ path: '.tmp/redesign-dark.png', animations: 'disabled' })
 })
 

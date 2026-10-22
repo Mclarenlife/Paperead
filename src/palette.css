@@ -1,0 +1,309 @@
+/* Roles follow Radix's neutral/blue scales. See docs/COLOR-SYSTEM.md. */
+:root {
+  color-scheme: light;
+  --neutral-1: #fcfcfc;
+  --neutral-2: #f9f9f9;
+  --neutral-3: #f0f0f0;
+  --neutral-4: #e8e8e8;
+  --neutral-5: #e0e0e0;
+  --neutral-6: #d9d9d9;
+  --neutral-7: #cecece;
+  --neutral-8: #bbbbbb;
+  --neutral-9: #8d8d8d;
+  --neutral-10: #838383;
+  --neutral-11: #646464;
+  --neutral-12: #202020;
+  --bg: var(--neutral-2);
+  --surface: #ffffff;
+  --sidebar: var(--neutral-1);
+  --ink: var(--neutral-12);
+  --muted: var(--neutral-11);
+  --line: var(--neutral-6);
+  --hover: var(--neutral-3);
+  --paper: var(--surface);
+  --control-border: var(--neutral-9);
+  --accent: #0d74ce;
+  --accent-hover: #075fad;
+  --accent-soft: #e6f4fe;
+  --accent-text: #113264;
+  --success: #18794e;
+  --success-soft: #e6f6eb;
+  --warning: #835000;
+  --warning-soft: #fefbe9;
+  --danger: #ce2c31;
+  --danger-soft: #feebec;
+  --on-action: #ffffff;
+  --action: #202020;
+  --action-hover: #383838;
+  --shadow: 0 4px 18px #00000008;
+  /* Compatibility aliases for existing feature components. */
+  --green: var(--accent);
+  --green-light: var(--accent-soft);
+  color: var(--ink);
+}
+[data-theme='dark'] {
+  color-scheme: dark;
+  --neutral-1: #111111;
+  --neutral-2: #191919;
+  --neutral-3: #222222;
+  --neutral-4: #2a2a2a;
+  --neutral-5: #313131;
+  --neutral-6: #3a3a3a;
+  --neutral-7: #484848;
+  --neutral-8: #606060;
+  --neutral-9: #6e6e6e;
+  --neutral-10: #7b7b7b;
+  --neutral-11: #b4b4b4;
+  --neutral-12: #eeeeee;
+  --bg: var(--neutral-1);
+  --surface: var(--neutral-2);
+  --sidebar: var(--neutral-2);
+  --paper: var(--neutral-2);
+  --control-border: var(--neutral-10);
+  --accent: #70b8ff;
+  --accent-hover: #c2e6ff;
+  --accent-soft: #0d2847;
+  --accent-text: #c2e6ff;
+  --success: #3dd68c;
+  --success-soft: #132d21;
+  --warning: #ffca16;
+  --warning-soft: #302008;
+  --danger: #ff9592;
+  --danger-soft: #3b181b;
+  --action: #eeeeee;
+  --action-hover: #ffffff;
+  --on-action: #191919;
+  --shadow: 0 4px 18px #00000030;
+}
+body {
+  color: var(--ink);
+}
+.brand-icon {
+  background: var(--action);
+  color: var(--on-action);
+}
+.button.primary,
+.icon-button.solid {
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--on-action);
+}
+.button.primary:hover {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
+  opacity: 1;
+}
+.workspace-label,
+[data-theme='dark'] .workspace-label {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: none;
+}
+.main-navigation > button,
+.collection-navigation > button,
+.sidebar-settings {
+  color: var(--muted);
+}
+.main-navigation > button.active,
+.collection-navigation > button.active,
+[data-theme='dark'] .main-navigation > button.active,
+[data-theme='dark'] .collection-navigation > button.active {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.main-navigation > button:hover,
+.collection-navigation > button:hover,
+[data-theme='dark'] .main-navigation > button:hover,
+[data-theme='dark'] .collection-navigation > button:hover {
+  background: var(--hover);
+}
+.main-navigation > button.active:hover,
+.collection-navigation > button.active:hover {
+  background: var(--accent-soft);
+}
+.main-navigation .active small {
+  color: var(--accent-text);
+  background: transparent;
+}
+.workspace-tab[aria-selected='true'] svg {
+  color: var(--accent);
+}
+.workspace-tabs > .active,
+.document-tab.active {
+  box-shadow: inset 0 2px var(--accent);
+}
+.stat-icon,
+.stat-icon.lilac,
+.stat-icon.amber,
+[data-theme='dark'] .stat-icon,
+[data-theme='dark'] .stat-icon.lilac,
+[data-theme='dark'] .stat-icon.amber {
+  color: var(--muted);
+  background: var(--hover);
+  border: 0;
+}
+.overview-stat strong,
+.section-heading h2,
+.paper-title,
+[data-theme='dark'] .overview-stat strong,
+[data-theme='dark'] .section-heading h2,
+[data-theme='dark'] .paper-title {
+  color: var(--ink);
+}
+.paper-authors,
+.paper-footer,
+.section-heading p,
+.page-footer,
+.sidebar-section-label,
+.sidebar-section-label > span,
+.local-status,
+.sheet-counter,
+.main-navigation small,
+.collection-navigation small,
+.breadcrumb,
+.filter-tabs > button,
+.sort-select,
+.sort-select > select {
+  color: var(--muted);
+}
+.paper-authors,
+.paper-footer {
+  font-size: 11px;
+}
+.section-heading p,
+.sidebar-section-label,
+.local-status {
+  font-size: 11px;
+}
+.paper-title:hover,
+.markdown a,
+.text-button,
+.icon-button.selected {
+  color: var(--accent);
+}
+.text-button:hover {
+  color: var(--accent-hover);
+}
+.filter-tabs > button.active {
+  color: var(--ink);
+}
+.filter-tabs > button.active:after {
+  background: var(--accent);
+}
+.paper-art,
+.art-sage,
+.art-lavender,
+.art-sand,
+.art-blue,
+.art-rose,
+.art-olive,
+[data-theme='dark'] .paper-art {
+  background: var(--neutral-3);
+  --cover-ink: #69727b;
+  filter: none;
+}
+/* Imported thumbnails retain their original colors and brightness. */
+.tag,
+.paper-card:nth-child(3n + 2) .tag,
+.paper-card:nth-child(3n) .tag,
+[data-theme='dark'] .tag {
+  background: var(--hover);
+  border-color: var(--line);
+  color: var(--muted);
+}
+.tag:hover,
+.tag.tag-active {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.count-badge,
+[data-theme='dark'] .count-badge {
+  color: var(--muted);
+  background: var(--hover);
+  border-color: var(--line);
+}
+.status,
+[data-theme='dark'] .status {
+  color: var(--muted);
+  background: var(--hover);
+  font-size: 10px;
+}
+.status-reading,
+[data-theme='dark'] .status-reading {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.status-finished,
+[data-theme='dark'] .status-finished {
+  color: var(--success);
+  background: var(--success-soft);
+}
+.online-dot {
+  background: var(--success);
+}
+.star-button.starred {
+  color: var(--warning);
+}
+.paper-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.view-switch > button.active {
+  color: var(--ink);
+  background: var(--hover);
+}
+input,
+textarea,
+select {
+  border-color: var(--control-border);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.button.danger,
+.toast-error,
+.error-box,
+.draft-error {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+.job-error,
+.danger-text {
+  color: var(--danger) !important;
+}
+.window-controls .window-close:hover {
+  background: #ce2c31;
+  color: #fff;
+}
+.markdown blockquote,
+[data-theme='dark'] .markdown blockquote {
+  color: var(--muted);
+  background: var(--hover);
+  border-color: var(--line);
+}
+.reader-scroll,
+[data-theme='dark'] .reader-scroll {
+  background: var(--neutral-3);
+}
+.button.subtle,
+.global-search input {
+  border-color: transparent;
+}
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}

@@ -412,7 +412,7 @@ test('mobile library and notes stay inside the viewport; theme persists', async 
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await expect(page.locator('.paper-card').last()).toHaveCSS('opacity', '1')
-  await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(18, 18, 18)')
+  await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(17, 17, 17)')
   await page.evaluate(() => document.fonts.ready)
   await page.screenshot({
     path: '.tmp/library-dark-mobile.png',
