@@ -2,13 +2,22 @@ name: Build macOS test installer
 
 on:
   workflow_dispatch:
+    inputs:
+      runner:
+        description: macOS build machine (use macos-15 if the latest image queue is busy)
+        type: choice
+        default: macos-latest
+        options:
+          - macos-latest
+          - macos-15
+          - macos-15-intel
 
 permissions:
   contents: read
 
 jobs:
   macos:
-    runs-on: macos-latest
+    runs-on: ${{ inputs.runner || 'macos-latest' }}
     timeout-minutes: 60
     env:
       RUSTUP_TOOLCHAIN: '1.98.1'
