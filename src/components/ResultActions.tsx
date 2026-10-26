@@ -56,7 +56,7 @@ export function ResultActions({ job, onEdit }: { job: Job; onEdit?: () => void }
           ) : (
             <p>
               彻底删除「{resultName(job)}」？此版本的 {count}{' '}
-              条批注、书签和校对草稿将一起删除，其他版本与独立笔记保留。已由此版本创建的重排任务继续使用各自保存的输入。此操作无法撤销。
+              条批注、书签和校对草稿将一起删除，其他版本与独立笔记保留。已有历史任务的输入快照保持独立。此操作无法撤销。
             </p>
           )}
           <div className="modal-actions">

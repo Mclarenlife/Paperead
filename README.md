@@ -2,11 +2,11 @@
 
 **让阅读，沉淀为知识。** 一个使用 Tauri 2、React 19 与 TypeScript 构建的本地优先论文阅读工作台。
 
-这是可运行的 **0.1.10 测试版**：统一阅读器、笔记和设置页的配色、字号与间距；正文采用桌面 18px / 窄屏 17px，编辑区 16px，控件 14–16px，说明 13px。沿用黑白灰与蓝色交互角色，修正深色服务商选中态和笔记页底部布局。规范依据见 [字号与间距](docs/TYPOGRAPHY.md) 和 [配色设计](docs/COLOR-SYSTEM.md)。支持可收起侧栏、文献标签页，以及融合系统窗口控制的顶栏。保留 DeepSeek V4 首字等待优化、双栏分段、Markdown 标题与 LaTeX 公式保护、并行批次即时预览，以及 PDF／Word 导出、快照、引用管理、Markdown 笔记、离线 OCR 和视觉解析。本轮已生成 Windows、Android ARM64 与 macOS 通用版测试安装包。Android 和 macOS 仍需用户设备上的完整使用验收，iOS 尚未打包。不包含 WebDAV 或云同步。
+这是可运行的 **0.1.11 测试版**：阅读器合并为单行工具栏，标题与作者不再重复显示；提供原文、译文、对照三种视图。PDF 可连续下滑，按可视区域绘制页面；原译文窗口独立滚动，支持跨页定位、批注和阅读位置恢复。智能重排功能已移除，已有历史结果保留可读可导出，扫描件识别继续保留。详见 [本轮阅读器改进](docs/READER-0.1.11.md)。沿用黑白灰与蓝色交互配色、较大的阅读字号和可收起侧栏。本轮提供 Windows、Android ARM64 和 macOS 通用版测试安装包；完整真机使用仍需验收，iOS 尚未打包，不包含云同步。
 
-Android 测试包：`release/Paperead_0.1.10_Android-arm64-test.apk`（release 优化、测试签名，最低 API 26）。macOS 测试包：`release/Paperead_0.1.10_macOS-universal.dmg`（Apple Silicon / Intel，ad-hoc 签名，未公证）。安装与构建说明见 [原生平台文档](docs/NATIVE-PLATFORMS.md)；macOS 产物也可从 [GitHub Actions](https://github.com/Mclarenlife/Paperead/actions/workflows/macos-installer.yml) 下载。
+Android 测试包：`release/Paperead_0.1.11_Android-arm64-test.apk`（release 优化、测试签名，最低 API 26）。macOS 测试包：`release/Paperead_0.1.11_macOS-universal.dmg`（Apple Silicon / Intel，ad-hoc 签名，未公证）。安装与构建说明见 [原生平台文档](docs/NATIVE-PLATFORMS.md)；macOS 产物也可从 [GitHub Actions](https://github.com/Mclarenlife/Paperead/actions/workflows/macos-installer.yml) 下载。
 
-Windows 安装包：`release/Paperead_0.1.10_x64-setup.exe`（未签名开发版）。关闭旧版后运行安装包升级，资料保留；旧译文需点击“使用当前配置重新处理”应用新的分段和公式保护。缺少 WebView2 时需要联网安装运行时。详见 [本次修复与验收](docs/AI-0.1.6.md)、[Windows 打包](docs/WINDOWS-BUILD.md)、[其他平台](docs/NATIVE-PLATFORMS.md)。
+Windows 安装包：`release/Paperead_0.1.11_x64-setup.exe`（未签名开发版）。关闭旧版后运行安装包升级，资料保留；旧译文需点击“使用当前配置重新处理”应用新的分段和公式保护。缺少 WebView2 时需要联网安装运行时。详见 [本次修复与验收](docs/AI-0.1.6.md)、[Windows 打包](docs/WINDOWS-BUILD.md)、[其他平台](docs/NATIVE-PLATFORMS.md)。
 
 每轮代码或界面修改验证后重新生成测试包，保留旧包；只使用本地安装包及 Actions 临时构建产物，不发布 GitHub Release。详见 [项目交付约定](AGENTS.md)。
 
@@ -38,10 +38,10 @@ pnpm format          # 统一代码格式
 
 - **文献管理**：拖拽 / 批量导入 PDF，SHA-256 去重，元数据与缩略图，标题、作者、年份、来源、摘要、标签、文献集、收藏、阅读状态、检索和排序。卡片和列表的「更多操作」可直接整理文献；勾选后可批量移动、增删或替换标签、修改状态、导出原始文献 ZIP、移入回收站。文献集可重命名、改色、删除；删除文献集保留论文。
 - **回收站**：文献、笔记、批注先软删除，支持短时撤销和手动恢复，不自动清空。文献恢复时保留 PDF、批注及 AI 结果；彻底删除前再次确认，独立笔记保留并解除关联。
-- **PDF 阅读**：PDF.js Worker 渲染，文本选择，翻页与页码跳转、缩放。文献内全文查找与匹配跳转（Ctrl/Cmd+F）、PDF 自带目录、Markdown 标题目录、命名书签；原文页和各结果版本独立记录阅读位置。PDF 字体、中文 CMap、图片解码器与界面字体都随应用打包。
-- **批注**：原文、译文、重排内容可划词高亮与评论；PDF 使用归一化坐标，文本结果使用引用和文字偏移；AI 批注绑定生成版本。支持编辑评论和颜色、搜索引用与评论、按来源或当前版本筛选、导出当前文献的 Markdown 批注汇总，以及转为关联笔记。
-- **AI**：OpenAI Responses、OpenAI 兼容 Chat Completions、Claude Messages、Gemini generateContent 四种协议。自定义地址、模型与目标语言；按段落跨页合并、连续全文 Markdown、可选逐段原文对照、流式预览、暂停、失败继续与结果持久化。
-- **校对与版本**：AI 结果可命名、单独删除、编辑 Markdown 并预览；校对另存为修订版本，原结果与原批注保留。重排可选择原文、已有译文或校对版本。偏好设置可保存和切换多套命名 API 配置。
+- **PDF 阅读**：PDF.js Worker 按可视区域渲染，连续下滑、文本选择、页码跳转、缩放；原文 / 译文 / 对照视图，双窗口独立滚动。文献内全文查找与匹配跳转（Ctrl/Cmd+F）、PDF 自带目录、Markdown 标题目录、命名书签；原文页和各结果版本独立记录阅读位置。PDF 字体、中文 CMap、图片解码器与界面字体都随应用打包。
+- **批注**：原文、译文及已有历史结果可划词高亮与评论；PDF 使用页面归一化坐标，文本结果使用引用和文字偏移；AI 批注绑定生成版本。支持编辑评论和颜色、搜索引用与评论、按来源或当前版本筛选、导出当前文献的 Markdown 批注汇总，以及转为关联笔记。
+- **AI**：OpenAI Responses、OpenAI 兼容 Chat Completions、Claude Messages、Gemini generateContent 四种协议。自定义地址、模型与目标语言；按段落跨页翻译、连续全文 Markdown、可选逐段原文对照、流式预览、暂停、失败继续与结果持久化。
+- **校对与版本**：AI 结果可命名、单独删除、编辑 Markdown 并预览；校对另存为修订版本，原结果与原批注保留。已有译文可继续校对、查看与导出。偏好设置可保存和切换多套命名 API 配置。
 - **Markdown 笔记**：本地即时保存、编辑 / 分栏 / 预览、搜索、关联论文、文件夹、标签、历史恢复、图片附件、导入导出与批量 ZIP。支持 GFM 表格、任务列表和 LaTeX 公式。写入失败保留草稿，可重试和导出；离开或关闭前提醒，独立草稿缓存可在重启后恢复。
 - **导出**：Markdown、独立 HTML、TXT、结构化 DOCX、直接生成 PDF、原始 PDF。文件名区分来源及结果版本。
 - **备份**：资料库 ZIP、图片校验和、恢复覆盖预览、恢复前快照；应用运行时自动备份与提醒、本机快照保留数量和删除管理。
@@ -56,7 +56,7 @@ pnpm format          # 统一代码格式
 1. 打开「偏好设置 → AI 服务」。
 2. 为配置命名，选择协议，填写 Base URL、你账户实际可用的模型 ID、目标语言与 API Key；「新建配置」可以另存其他服务或模型。
 3. 保存或测试连接。
-4. 打开文献的 AI 阅读助手，选择翻译或重排；勾选「原文对照」即可获得 `> 原文` 下接译文的逐段 Markdown。译文完成后可「校对当前结果 → 保存为新版本」，再选择该版本作为「重排输入来源」。
+4. 打开文献的 AI 阅读助手，开始翻译；勾选「原文对照」即可获得 `> 原文` 下接译文的逐段 Markdown。译文完成后可「校对当前结果 → 保存为新版本」，并切换到「对照」视图与原文一起阅读。
 
 切换配置会同时切换地址、模型、语言和请求参数，不自动调用 API。相同协议和地址的配置共用该地址的密钥；不同地址的密钥隔离。删除配置不删除共用的系统凭据，需要时使用「清除密钥」。运行中的任务保留启动时的配置和输入快照。
 

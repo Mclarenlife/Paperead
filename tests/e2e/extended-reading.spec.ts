@@ -211,7 +211,9 @@ test('citation import and DOI preview require explicit application and can attac
   await page.getByRole('button', { name: '应用 DOI 信息' }).click()
   await page.getByLabel('我已核对这些文献元数据').check()
   await page.getByRole('button', { name: '保存更改', exact: true }).click()
-  await expect(page.locator('.reader-heading')).toContainText('DOI Verified Study')
+  await expect(page.locator('.document-tab.active .workspace-tab')).toContainText(
+    'DOI Verified Study',
+  )
   await page.getByLabel('编辑文献信息').click()
   const pdf = await PDFDocument.create()
   pdf.addPage()

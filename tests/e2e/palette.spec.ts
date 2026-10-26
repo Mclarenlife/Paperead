@@ -63,10 +63,10 @@ test('key text retains contrast in both themes', async ({ page }) => {
       expect(ratio, `${theme}: ${pair.selector}`).toBeGreaterThanOrEqual(4.5)
     }
     await page.screenshot({
-      path: `.tmp/palette-0.1.10-${theme}.png`,
+      path: `.tmp/palette-0.1.11-${theme}.png`,
       fullPage: true,
       animations: 'disabled',
     })
   }
-  await writeFile('.tmp/palette-0.1.10-contrast.json', JSON.stringify(reports, null, 2))
+  await writeFile('.tmp/palette-0.1.11-contrast.json', JSON.stringify(reports, null, 2))
 })

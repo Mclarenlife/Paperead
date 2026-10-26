@@ -49,7 +49,7 @@ async function inspect(page: Page, scope: string, selectors: [string, number][])
     )
     expect(metric.contrast, `${scope}: ${metric.selector} contrast`).toBeGreaterThanOrEqual(4.5)
   }
-  await writeFile(`.tmp/typography-0.1.10-${scope}.json`, JSON.stringify(metrics, null, 2))
+  await writeFile(`.tmp/typography-0.1.11-${scope}.json`, JSON.stringify(metrics, null, 2))
 }
 
 async function fitViewport(page: Page, selector: string) {
@@ -76,16 +76,15 @@ for (const theme of ['light', 'dark']) {
     await page.locator('.paper-title').first().click()
     await page.getByRole('button', { name: 'AI 阅读助手', exact: true }).click()
     await inspect(page, `reader-${theme}`, [
-      ['.reader-heading strong', 16],
-      ['.reader-heading > span', 13],
-      ['.reader-mode-tabs > button', 14],
+      ['.pane-heading', 13],
+      ['.reader-view-switch > button', 14],
       ['.reading-paper .markdown p', 18],
       ['.ai-action-card h4', 16],
       ['.ai-action-card p', 13],
       ['.ai-service small', 13],
     ])
     await fitViewport(page, '.reader-overlay')
-    await page.screenshot({ path: `.tmp/reader-0.1.10-${theme}.png`, animations: 'disabled' })
+    await page.screenshot({ path: `.tmp/reader-0.1.11-${theme}.png`, animations: 'disabled' })
     await page.getByRole('button', { name: '返回文献库', exact: true }).click()
     await page.getByRole('button', { name: '我的笔记', exact: true }).click()
     await expect(page.getByLabel('Markdown 笔记正文')).toBeVisible()
@@ -101,7 +100,7 @@ for (const theme of ['light', 'dark']) {
     await fitViewport(page, '.notes-page')
     const notes = await page.locator('.notes-page').boundingBox()
     expect(notes!.y + notes!.height).toBeLessThanOrEqual(page.viewportSize()!.height + 1)
-    await page.screenshot({ path: `.tmp/notes-0.1.10-${theme}.png`, animations: 'disabled' })
+    await page.screenshot({ path: `.tmp/notes-0.1.11-${theme}.png`, animations: 'disabled' })
     await page.getByRole('button', { name: '偏好设置', exact: true }).click()
     await expect(page.locator('.ai-settings-form')).not.toBeDisabled()
     await inspect(page, `settings-${theme}`, [
@@ -114,9 +113,9 @@ for (const theme of ['light', 'dark']) {
       ['.privacy-note p', 13],
     ])
     await fitViewport(page, '.settings-modal')
-    await page.screenshot({ path: `.tmp/settings-0.1.10-${theme}.png`, animations: 'disabled' })
+    await page.screenshot({ path: `.tmp/settings-0.1.11-${theme}.png`, animations: 'disabled' })
     await page.getByRole('button', { name: '数据与备份', exact: true }).click()
-    await page.screenshot({ path: `.tmp/backup-0.1.10-${theme}.png`, animations: 'disabled' })
+    await page.screenshot({ path: `.tmp/backup-0.1.11-${theme}.png`, animations: 'disabled' })
   })
 }
 
@@ -129,11 +128,11 @@ test('mobile text and controls fit reader, notes and settings without shrinking 
   await page.locator('.paper-title').first().click()
   await inspect(page, 'reader-mobile', [
     ['.reading-paper .markdown p', 17],
-    ['.reader-mode-tabs > button', 14],
+    ['.reader-view-switch > button', 14],
   ])
   await fitViewport(page, '.reader-toolbar')
   await expect(page.getByLabel('下一页', { exact: true })).toHaveCSS('min-height', '44px')
-  await page.screenshot({ path: '.tmp/reader-0.1.10-mobile.png', animations: 'disabled' })
+  await page.screenshot({ path: '.tmp/reader-0.1.11-mobile.png', animations: 'disabled' })
   await page.getByRole('button', { name: 'AI 阅读助手', exact: true }).click()
   await fitViewport(page, '.reader-side')
   const body = await page.locator('.reader-body').boundingBox()
@@ -154,7 +153,7 @@ test('mobile text and controls fit reader, notes and settings without shrinking 
       .locator('.note-editor-toolbar')
       .evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
   ).toBe(true)
-  await page.screenshot({ path: '.tmp/notes-0.1.10-mobile.png', animations: 'disabled' })
+  await page.screenshot({ path: '.tmp/notes-0.1.11-mobile.png', animations: 'disabled' })
   await page.locator('.sidebar-toggle').click()
   await page.getByRole('button', { name: '偏好设置', exact: true }).click()
   await inspect(page, 'settings-mobile', [
@@ -168,7 +167,7 @@ test('mobile text and controls fit reader, notes and settings without shrinking 
   ).toBe(true)
   await page.getByRole('button', { name: '保存配置', exact: true }).scrollIntoViewIfNeeded()
   await expect(page.getByRole('button', { name: '保存配置', exact: true })).toBeInViewport()
-  await page.screenshot({ path: '.tmp/settings-0.1.10-mobile.png', animations: 'disabled' })
+  await page.screenshot({ path: '.tmp/settings-0.1.11-mobile.png', animations: 'disabled' })
 })
 
 test('enlarging text to 200 percent retains settings controls and document content', async ({
@@ -196,5 +195,5 @@ test('enlarging text to 200 percent retains settings controls and document conte
   ).toBe(true)
   await page.getByRole('button', { name: '保存配置', exact: true }).scrollIntoViewIfNeeded()
   await expect(page.getByRole('button', { name: '保存配置', exact: true })).toBeInViewport()
-  await page.screenshot({ path: '.tmp/settings-0.1.10-200percent.png', animations: 'disabled' })
+  await page.screenshot({ path: '.tmp/settings-0.1.11-200percent.png', animations: 'disabled' })
 })

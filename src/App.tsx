@@ -542,7 +542,7 @@ function Workspace() {
                       <div className="empty-state">
                         <Sparkles size={32} />
                         <h3>新的理解，从一篇论文开始</h3>
-                        <p>在文献阅读器中打开 AI 助手，开始翻译或重排。</p>
+                        <p>在文献阅读器中打开 AI 助手，开始翻译。</p>
                         <button className="button" onClick={() => navigate('library')}>
                           前往文献库
                         </button>
@@ -666,12 +666,12 @@ function Workspace() {
                     <p>
                       <b>02 · 读懂并留下思考</b>
                       <br />
-                      选中文字添加高亮批注。连接你自己的 AI API 后，可生成全文译文和重排文档。
+                      选中文字添加高亮批注。连接你自己的 AI API 后，可生成全文译文并进行原译文对照。
                     </p>
                     <p>
                       <b>03 · 让知识连接起来</b>
                       <br />
-                      批注可以收集到 Markdown 笔记；笔记、译文和重排内容都能导出。
+                      批注可以收集到 Markdown 笔记；笔记、译文和历史文档都能导出。
                     </p>
                     <p>
                       <b>04 · 带走你的资料</b>

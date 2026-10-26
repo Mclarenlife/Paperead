@@ -18,7 +18,10 @@ test('neutral workspace with accents, persistent sidebar and document tabs', asy
   await page.locator('.paper-title').nth(1).click()
   await expect(page.locator('.document-tab')).toHaveCount(2)
   await page.getByRole('tab', { name: first!.trim(), exact: true }).click()
-  await expect(page.locator('.reader-heading strong')).toHaveText(first!.trim())
+  await expect(page.locator('.document-tab.active .workspace-tab')).toHaveAttribute(
+    'title',
+    first!.trim(),
+  )
   await expect(page.locator('.reader-overlay')).toHaveCSS('opacity', '1')
   await page.screenshot({ path: '.tmp/redesign-reader.png' })
   await page.locator('.document-tab.active .tab-close').click()

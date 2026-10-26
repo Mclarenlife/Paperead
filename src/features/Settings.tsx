@@ -277,7 +277,7 @@ export function Settings({
               </span>
               <div>
                 <h3>让 AI 成为你的阅读伙伴</h3>
-                <p>连接你喜欢的模型，翻译、重排，读懂每一个想法。</p>
+                <p>连接你喜欢的模型，翻译，读懂每一个想法。</p>
               </div>
             </div>
             <div className="profile-manager">
@@ -604,7 +604,7 @@ export function Settings({
             <div className="privacy-note">
               <BookLogo />
               <p>
-                Paperead 0.1.10 · 本地优先的论文阅读工作台
+                Paperead 0.1.11 · 本地优先的论文阅读工作台
                 <br />
                 快捷键：Ctrl / ⌘ K 搜索 · Ctrl / ⌘ O 导入 · Esc 关闭面板
               </p>

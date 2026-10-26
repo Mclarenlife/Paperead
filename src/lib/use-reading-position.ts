@@ -8,6 +8,7 @@ export function useReadingPosition(
   scroll: React.RefObject<HTMLDivElement | null>,
   ready: boolean,
   jump?: ReadingLocation & { token: number },
+  continuous = false,
 ) {
   const latest = useRef({ paper, location })
   latest.current = { paper, location }
@@ -18,11 +19,29 @@ export function useReadingPosition(
     timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const getLocation = useCallback(() => {
     const el = scroll.current
+    const slot =
+      continuous && latest.current.location.source === 'original'
+        ? el?.querySelector<HTMLElement>(
+            `.pdf-page-slot[data-page="${latest.current.location.page}"]`,
+          )
+        : null
     return {
       ...latest.current.location,
-      progress: el ? el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight) : 0,
+      progress:
+        slot && el
+          ? Math.max(
+              0,
+              Math.min(
+                1,
+                (el.getBoundingClientRect().top - slot.getBoundingClientRect().top) /
+                  slot.clientHeight,
+              ),
+            )
+          : el
+            ? el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight)
+            : 0,
     }
-  }, [scroll])
+  }, [scroll, continuous])
   const flush = useCallback(async () => {
     clearTimeout(timer.current)
     const target = pending.current,
@@ -40,19 +59,38 @@ export function useReadingPosition(
     if (!enabled.current) return
     pending.current = getLocation()
     clearTimeout(timer.current)
-    timer.current = setTimeout(flush, 200)
+    timer.current = setTimeout(() => {
+      pending.current = getLocation()
+      void flush()
+    }, 200)
   }, [flush, getLocation])
-  const key = locationKey(location)
+  const key =
+    continuous && location.source === 'original' ? 'original:continuous' : locationKey(location)
   useLayoutEffect(() => {
     enabled.current = false
     if (!ready || !paper) return
-    const hasJump = jump && jump.token !== usedJump.current && locationKey(jump) === key
-    const saved = hasJump ? jump : paper.readingPositions?.[key]
+    const hasJump =
+      jump &&
+      jump.token !== usedJump.current &&
+      ((continuous && jump.source === 'original') || locationKey(jump) === key)
+    const saved = hasJump ? jump : paper.readingPositions?.[locationKey(location)]
     if (hasJump) usedJump.current = jump.token
     if (scroll.current) {
-      scroll.current.scrollTop =
-        (saved?.progress || 0) *
-        Math.max(0, scroll.current.scrollHeight - scroll.current.clientHeight)
+      const slot =
+        continuous && location.source === 'original'
+          ? scroll.current.querySelector<HTMLElement>(
+              `.pdf-page-slot[data-page="${saved?.page || location.page}"]`,
+            )
+          : null
+      if (slot)
+        scroll.current.scrollTop +=
+          slot.getBoundingClientRect().top -
+          scroll.current.getBoundingClientRect().top +
+          (saved?.progress || 0) * slot.clientHeight
+      else
+        scroll.current.scrollTop =
+          (saved?.progress || 0) *
+          Math.max(0, scroll.current.scrollHeight - scroll.current.clientHeight)
       enabled.current = true
       pending.current = { ...latest.current.location, progress: saved?.progress || 0 }
       void flush()

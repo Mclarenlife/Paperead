@@ -93,13 +93,17 @@ async function translate(page: Page) {
 test('PDF full-text search jumps across pages; outline and bookmarks persist', async ({ page }) => {
   await page.getByLabel('选择 PDF 文献').setInputFiles('.tmp/navigation.pdf')
   await page.getByRole('button', { name: '阅读 Navigation Study', exact: true }).click()
-  await expect(page.locator('.textLayer')).toContainText('Introduction')
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .textLayer')).toContainText(
+    'Introduction',
+  )
   await page.keyboard.press('Control+f')
   await page.getByLabel('文献内全文查找').fill('needlecrosspage')
   await expect(page.locator('.search-match')).toHaveCount(2)
   await page.locator('.search-match').last().click()
   await expect(page.getByLabel('跳转页码')).toHaveValue('2')
-  await expect(page.locator('.textLayer')).toContainText('physical page 2')
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .textLayer')).toContainText(
+    'physical page 2',
+  )
   await expect
     .poll(() => page.evaluate(() => (CSS as any).highlights.get('reader-search')?.size || 0))
     .toBe(1)
@@ -155,7 +159,7 @@ test('annotation edits, source filtering, text search and Markdown summary expor
   await page.getByRole('button', { name: '阅读 Attention Is All You Need', exact: true }).click()
   await expect(page.locator('.annotation-card')).toContainText('Edited scientific comment')
 })
-test('translation can be revised, named, reflowed from that exact version and deleted independently', async ({
+test('translation can be revised, named and retained after deleting the original version', async ({
   page,
 }) => {
   test.setTimeout(90_000)
@@ -227,23 +231,16 @@ test('translation can be revised, named, reflowed from that exact version and de
     )
     .toBeGreaterThan(0.55)
   await page.getByRole('button', { name: 'AI 阅读助手', exact: true }).click()
-  await page.getByLabel('重排输入来源').selectOption({ label: '校对定稿' })
-  await page.getByRole('button', { name: /开始重排/ }).click()
-  await expect(page.locator('.reading-paper')).toContainText('Reflowed correction')
-  expect(requests).toHaveLength(2)
-  const payload = JSON.parse(
-    requests[1].messages.at(-1).content.split('SOURCE_JSON:\n')[1].split('\nEND_SOURCE_JSON')[0],
-  )
-  expect(payload.text).toContain('OnlyEditedInput')
-  expect(payload.text).not.toContain('Vaswani')
+  await expect(page.getByRole('button', { name: '开始重排', exact: false })).toHaveCount(0)
+  expect(requests).toHaveLength(1)
   await page
     .locator('.job-card')
-    .filter({ has: page.locator('.result-version-name', { hasText: '校对定稿' }) })
+    .filter({ has: page.locator('.result-version-name', { hasText: '初始译文' }) })
     .getByRole('button', { name: '删除版本', exact: true })
     .click()
   await page.getByRole('button', { name: '确认删除版本', exact: true }).click()
-  await expect(page.locator('.job-card')).toHaveCount(2)
-  await expect(page.locator('.reading-paper')).toContainText('Reflowed correction')
+  await expect(page.locator('.job-card')).toHaveCount(1)
+  await expect(page.locator('.reading-paper')).toContainText('OnlyEditedInput')
   await page.screenshot({ path: '.tmp/reader-results-014.png', animations: 'disabled' })
 })
 test('AI correction draft warns before leaving and is recovered after reload', async ({ page }) => {

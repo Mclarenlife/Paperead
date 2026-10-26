@@ -1,0 +1,156 @@
+/* A document gets one toolbar beneath the app's native/tab bar. */
+.unified-reader-toolbar {
+  flex-wrap: nowrap;
+  min-height: 60px;
+  height: 60px;
+  padding: 6px 16px;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+.unified-reader-toolbar > * {
+  flex-shrink: 0;
+}
+.reader-view-switch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.reader-view-switch button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  min-height: 34px;
+  border-radius: 5px;
+  font-size: var(--text-ui);
+  color: var(--muted);
+}
+.reader-view-switch .active {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.unified-reader-toolbar .reader-header-actions {
+  margin-left: auto;
+  gap: 6px;
+}
+.unified-reader-toolbar .zoom-controls {
+  display: flex;
+  padding: 0 8px;
+  gap: 0;
+}
+.unified-reader-toolbar .document-mode-label {
+  font-size: var(--text-caption);
+}
+.reader-panes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.reader-panes.view-compare {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.document-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.view-compare .translation-pane {
+  border-left: 1px solid var(--line);
+}
+.pane-heading {
+  padding: 8px 16px;
+  min-height: 36px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--muted);
+}
+.document-pane .reader-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.translation-scroll .reading-paper {
+  min-height: 0;
+}
+.view-compare .reader-scroll {
+  padding: 16px;
+}
+.view-compare .reading-paper {
+  padding: 24px;
+}
+.pdf-continuous {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+}
+.pdf-page-slot {
+  position: relative;
+  padding-bottom: 8px;
+}
+.pdf-page-caption {
+  height: 24px;
+  padding: 2px 0;
+  font-size: var(--text-caption);
+  color: var(--muted);
+  text-align: center;
+}
+.pdf-page-slot .pdf-surface {
+  min-height: 0;
+}
+.pdf-surface[data-ready='false'] canvas,
+.pdf-surface[data-ready='false'] .textLayer {
+  visibility: hidden;
+}
+.pdf-page-slot .pdf-loading {
+  top: 24px;
+}
+.reader-body .reader-side {
+  top: 0;
+}
+@media (max-width: 780px) {
+  .unified-reader-toolbar {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  .reader-view-switch button {
+    padding: 6px 8px;
+    min-height: 40px;
+  }
+  .reader-view-switch svg {
+    display: none;
+  }
+  .unified-reader-toolbar .reader-header-actions > .button {
+    min-width: 44px;
+  }
+  .unified-reader-toolbar .reader-header-actions > .button > span {
+    display: none;
+  }
+  .reader-panes.view-compare {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .view-compare .translation-pane {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .view-compare .reader-scroll,
+  .document-pane .reader-scroll {
+    padding: 12px;
+  }
+  .view-compare .reading-paper {
+    padding: 20px;
+  }
+}

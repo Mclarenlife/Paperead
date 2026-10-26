@@ -63,7 +63,9 @@ test('real PDF preserves headings, two-column paragraphs and scripts; upgrading 
   expect(result.refreshed[0].text).toBe(result.first.text)
   expect(result.refreshed[1].text).toBe('## Recognized math\n\n$$\\frac{a}{b}$$')
   await page.getByRole('button', { name: '阅读 Layout Quality Study', exact: true }).click()
-  await expect(page.locator('.textLayer')).toContainText('Layout Quality Study')
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .textLayer')).toContainText(
+    'Layout Quality Study',
+  )
   await page.screenshot({ path: '.tmp/quality-016/source-layout.png' })
 })
 

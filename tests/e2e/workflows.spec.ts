@@ -49,8 +49,13 @@ test('real PDF import, duplicate prevention, page rendering, highlight and persi
   await expect(page.getByRole('status')).toContainText('已在文献库中')
   await expect(page.locator('.paper-card')).toHaveCount(7)
   await page.getByRole('button', { name: '阅读 Paperead Integration Study', exact: true }).click()
-  await expect(page.locator('.textLayer')).toContainText('Researchers compare')
-  const target = page.locator('.textLayer span').filter({ hasText: 'Researchers compare' }).first()
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .textLayer')).toContainText(
+    'Researchers compare',
+  )
+  const target = page
+    .locator('.pdf-page-slot[data-active="true"] .textLayer span')
+    .filter({ hasText: 'Researchers compare' })
+    .first()
   const rect = await target.boundingBox()
   expect(rect?.width).toBeGreaterThan(100)
   await target.evaluate((el) => {
@@ -60,21 +65,29 @@ test('real PDF import, duplicate prevention, page rendering, highlight and persi
     selection.removeAllRanges()
     selection.addRange(range)
   })
-  await page.locator('.pdf-surface').dispatchEvent('mouseup')
+  await page.locator('.pdf-page-slot[data-active="true"] .pdf-surface').dispatchEvent('mouseup')
   await page.getByLabel('批注内容').fill('This is an important finding.')
   await page.getByRole('button', { name: '保存批注', exact: true }).click()
   await expect(page.locator('.annotation-card')).toContainText('important finding')
-  await expect(page.locator('.pdf-highlights span')).toHaveCount(1)
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .pdf-highlights span')).toHaveCount(
+    1,
+  )
   await page.getByRole('button', { name: '下一页', exact: true }).click()
-  await expect(page.locator('.textLayer')).toContainText('Methods and Results')
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .textLayer')).toContainText(
+    'Methods and Results',
+  )
   await page.getByRole('button', { name: '上一页', exact: true }).click()
-  await expect(page.locator('.pdf-highlights span')).toHaveCount(1)
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .pdf-highlights span')).toHaveCount(
+    1,
+  )
   await page.screenshot({ path: '.tmp/pdf-reader.png', fullPage: true })
   await page.reload()
   await expect(page.locator('.paper-card')).toHaveCount(7)
   await page.getByRole('button', { name: '阅读 Paperead Integration Study', exact: true }).click()
   await expect(page.locator('.annotation-card')).toContainText('important finding')
-  await expect(page.locator('.textLayer')).toContainText('Researchers compare')
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .textLayer')).toContainText(
+    'Researchers compare',
+  )
   expect(errors).toEqual([])
 })
 
@@ -168,7 +181,7 @@ test('configured AI sends real request shape, saves translation and supports exp
   await (await downloading).saveAs('.tmp/translated.md')
   await page.reload()
   await page.getByRole('button', { name: '阅读 Attention Is All You Need', exact: true }).click()
-  await page.getByRole('button', { name: '智能翻译', exact: true }).click()
+  await page.getByRole('button', { name: '译文', exact: true }).click()
   await expect(page.locator('.reading-paper')).toContainText('这是一段用于接口测试的译文')
   await expect(page.locator('.annotation-card')).toContainText('译文中的思考')
 })
@@ -202,7 +215,9 @@ test('complete ZIP backup restores actual PDF bytes and metadata after deletion'
   await expect(page.getByRole('status')).toContainText('已恢复 7 篇文献')
   await page.getByRole('button', { name: '关闭', exact: true }).click()
   await page.getByRole('button', { name: '阅读 Paperead Integration Study', exact: true }).click()
-  await expect(page.locator('.textLayer')).toContainText('Researchers compare')
+  await expect(page.locator('.pdf-page-slot[data-active="true"] .textLayer')).toContainText(
+    'Researchers compare',
+  )
 })
 
 test('exports independent HTML, text and Word documents with actual readable content', async ({
@@ -238,7 +253,7 @@ test('rejects a corrupt PDF without creating partial records', async ({ page }) 
   await expect(page.locator('.paper-card')).toHaveCount(6)
 })
 
-test('AI reflow reports rate limits and resumes the unfinished task', async ({ page }) => {
+test('AI translation reports rate limits and resumes the unfinished task', async ({ page }) => {
   let requests = 0
   await page.route('http://127.0.0.1:11434/v1/chat/completions', async (route) => {
     requests++
@@ -253,7 +268,7 @@ test('AI reflow reports rate limits and resumes the unfinished task', async ({ p
                 {
                   message: {
                     content:
-                      '# Reflowed document\n\nThe original language and source content are preserved.',
+                      '# Recovered translation\n\nThe original language and source content are preserved.',
                   },
                 },
               ],
@@ -271,11 +286,11 @@ test('AI reflow reports rate limits and resumes the unfinished task', async ({ p
   await page.getByRole('button', { name: '关闭', exact: true }).click()
   await page.getByRole('button', { name: '阅读 Attention Is All You Need', exact: true }).click()
   await page.getByRole('button', { name: 'AI 阅读助手', exact: true }).click()
-  await page.getByRole('button', { name: '开始重排', exact: false }).click()
+  await page.getByRole('button', { name: '开始翻译', exact: false }).click()
   await expect(page.locator('.job-card')).toContainText('HTTP 429')
   await page.locator('.job-card').getByRole('button', { name: '继续', exact: true }).click()
   await expect(page.locator('.job-card')).toContainText('已完成')
-  await expect(page.locator('.reading-paper')).toContainText('Reflowed document')
+  await expect(page.locator('.reading-paper')).toContainText('Recovered translation')
   expect(requests).toBe(3)
 })
 
@@ -367,11 +382,8 @@ test('bilingual PDF becomes one Markdown with paragraph quotes, document annotat
   expect(markdown).not.toMatch(/source-page|paperead:|\n---\n/)
   await page.screenshot({ path: '.tmp/bilingual-document.png', animations: 'disabled' })
   await page.getByRole('button', { name: 'AI 阅读助手', exact: true }).click()
-  await page.getByRole('button', { name: '开始重排', exact: false }).click()
-  await expect(page.locator('.job-card').filter({ hasText: '智能重排' })).toContainText('已完成')
-  expect(sources).toHaveLength(2)
-  expect(sources[1].text).toContain('Methods and Results')
-  await expect(page.locator('.reading-paper')).toContainText('Continuous reflow')
+  await expect(page.getByRole('button', { name: '开始重排', exact: false })).toHaveCount(0)
+  expect(sources).toHaveLength(1)
   await page.reload()
   await page.getByRole('button', { name: 'AI 工作台', exact: true }).click()
   await page

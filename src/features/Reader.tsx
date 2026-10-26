@@ -2,7 +2,7 @@ import { PaperEditor } from '../components/PaperEditor'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RecognitionPanel } from '../components/RecognitionPanel'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { TextLayer, type PDFDocumentProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
+import { ContinuousPdf, type PdfJump } from '../components/ContinuousPdf'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   ArrowLeft,
@@ -29,10 +29,10 @@ import {
   X,
   Search,
   ListTree,
+  Columns2,
 } from 'lucide-react'
 import { db } from '../lib/db'
 import { moveToTrash, restoreFromTrash } from '../lib/trash'
-import { getDocument } from '../lib/pdf'
 import { cancelJob, createJob, jobMarkdown, runJob, sameService } from '../lib/ai'
 import { useJobProgress } from '../lib/ai-progress'
 import { documentPreview, bilingualMarkdown } from '../lib/document'
@@ -49,7 +49,6 @@ import {
 } from '../components/ReaderNavigation'
 import { ResultEditor } from '../components/ResultEditor'
 import { ResultActions } from '../components/ResultActions'
-import { resultName } from '../lib/results'
 import { annotationsMarkdown, editAnnotation } from '../lib/annotations'
 import { findMatches, locateRange } from '../lib/reading'
 import { useReadingPosition } from '../lib/use-reading-position'
@@ -64,7 +63,16 @@ import {
   type ReadingLocation,
 } from '../types'
 
-type SelectionInfo = { quote: string; rects: Rect[]; start: number; end: number }
+type SelectionInfo = {
+  quote: string
+  rects: Rect[]
+  start: number
+  end: number
+  source: Source
+  page: number
+  jobId?: string
+  pdf: boolean
+}
 
 export function Reader({
   id,
@@ -112,7 +120,9 @@ export function Reader({
     [aiBusy, setAiBusy] = useState(false)
   const [bilingual, setBilingual] = useState(config.bilingual === true)
   const [recognitionOpen, setRecognitionOpen] = useState(false)
-  const [reflowInput, setReflowInput] = useState('')
+  const [view, setView] = useState<'original' | 'translation' | 'compare'>('original')
+  const [resultSource, setResultSource] = useState<Job['kind']>('translation')
+  const [pdfJump, setPdfJump] = useState<PdfJump>()
   const [findTrigger, setFindTrigger] = useState(0)
   const [editingResult, setEditingResult] = useState<Job | null>(null)
   const [annotationQuery, setAnnotationQuery] = useState(''),
@@ -127,7 +137,15 @@ export function Reader({
   const [jumpTarget, setJumpTarget] = useState<(ReadingLocation & { token: number }) | undefined>(
     undefined,
   )
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const originalScrollRef = useRef<HTMLDivElement>(null)
+  const translationScrollRef = useRef<HTMLDivElement>(null)
+  const originalContentRef = useRef<HTMLDivElement>(null)
+  const translationContentRef = useRef<HTMLDivElement>(null)
+  const scrollRef = source === 'original' ? originalScrollRef : translationScrollRef
+  const contentRef = source === 'original' ? originalContentRef : translationContentRef
+  const onActiveElement = useCallback((element: HTMLDivElement | null) => {
+    originalContentRef.current = element
+  }, [])
   const onPdfReady = useCallback((page: number) => {
     setPdfReadyPage(page)
     setRenderEpoch((n) => n + 1)
@@ -138,14 +156,11 @@ export function Reader({
     if (paper?.deletedAt) onExit()
   }, [paper?.deletedAt, onExit])
   const [showSide, setShowSide] = useState(() => window.innerWidth > 780)
-  const contentRef = useRef<HTMLDivElement>(null),
-    toast = useToast(),
+  const toast = useToast(),
     initial = useRef(false)
   const latestJob =
-    source === 'original'
-      ? undefined
-      : jobs.find((j) => j.id === resultVersions[source] && j.kind === source) ||
-        [...jobs].sort((a, b) => b.updatedAt - a.updatedAt).find((j) => j.kind === source)
+    jobs.find((j) => j.id === resultVersions[resultSource] && j.kind === resultSource) ||
+    [...jobs].sort((a, b) => b.updatedAt - a.updatedAt).find((j) => j.kind === resultSource)
   const activity = useJobProgress(latestJob?.id)
   const preview = latestJob
     ? documentPreview(latestJob, activity?.fragments)
@@ -175,15 +190,62 @@ export function Reader({
   const location: ReadingLocation = {
     source,
     page: source === 'original' ? page : 1,
-    jobId: latestJob?.id,
+    jobId: source === 'original' ? undefined : latestJob?.id,
     progress: 0,
   }
-  const ready = pdfMode ? pdfReadyPage === page : !!text && latestJob?.status !== 'running'
-  const {
-    onScroll,
-    getLocation,
-    flush: flushPosition,
-  } = useReadingPosition(paper, location, scrollRef, ready, jumpTarget)
+  const hasPdf = !!paper && !paper.sample && !paper.referenceOnly
+  const ready =
+    source === 'original'
+      ? hasPdf
+        ? pdfReadyPage === page
+        : !!text
+      : !!text && latestJob?.status !== 'running'
+  const originalReading = useReadingPosition(
+    paper,
+    { source: 'original', page, progress: 0 },
+    originalScrollRef,
+    view !== 'translation' && (hasPdf ? pdfReadyPage > 0 : !!pages.length),
+    jumpTarget?.source === 'original' ? jumpTarget : undefined,
+    hasPdf,
+  )
+  const resultReading = useReadingPosition(
+    paper,
+    { source: resultSource, page: 1, jobId: latestJob?.id, progress: 0 },
+    translationScrollRef,
+    view !== 'original' && !!fullResult && latestJob?.status !== 'running',
+    jumpTarget?.source !== 'original' ? jumpTarget : undefined,
+  )
+  const { getLocation } = source === 'original' ? originalReading : resultReading
+  const flushPosition = useCallback(async () => {
+    if (source === 'original') {
+      await resultReading.flush()
+      originalReading.onScroll()
+      await originalReading.flush()
+    } else {
+      await originalReading.flush()
+      resultReading.onScroll()
+      await resultReading.flush()
+    }
+  }, [
+    source,
+    originalReading.flush,
+    originalReading.onScroll,
+    resultReading.flush,
+    resultReading.onScroll,
+  ])
+  const selectView = (next: typeof view) => {
+    void flushPosition()
+    setSelection(null)
+    setView(next)
+    if (next === 'compare') setShowSide(false)
+    setSource(next === 'original' ? 'original' : resultSource)
+  }
+  const changeZoom = (next: number) => {
+    const position = originalReading.getLocation()
+    setZoom(next)
+    if (hasPdf && originalScrollRef.current)
+      setPdfJump({ page: position.page, progress: position.progress, token: Date.now() })
+  }
   const onClose = useCallback(() => {
     void flushPosition().finally(onExit)
   }, [flushPosition, onExit])
@@ -255,7 +317,9 @@ export function Reader({
   }, [searchTarget, ready, source, page, renderEpoch, text])
   const showResult = (job: Job) => {
     setResultVersions((prev) => ({ ...prev, [job.kind]: job.id }))
+    setResultSource(job.kind)
     setSource(job.kind)
+    setView((v) => (v === 'compare' ? v : 'translation'))
   }
   const jump = (target: ReadingLocation) => {
     if (target.source !== 'original' && !jobs.some((j) => j.id === target.jobId)) {
@@ -263,8 +327,12 @@ export function Reader({
       return
     }
     setSource(target.source)
+    if (target.source !== 'original') setResultSource(target.source)
+    setView((v) =>
+      v === 'compare' ? v : target.source === 'original' ? 'original' : 'translation',
+    )
     setResultVersions((prev) => ({ ...prev, [target.source]: target.jobId || '' }))
-    if (target.source === 'original') navigate(target.page)
+    if (target.source === 'original') navigate(target.page, target.progress)
     setJumpTarget({ ...target, token: Date.now() })
     setSearchTarget(null)
     if (window.innerWidth <= 780) setShowSide(false)
@@ -278,13 +346,15 @@ export function Reader({
     if (selected) {
       setResultVersions((prev) => ({ ...prev, [selected.kind]: selected.id }))
       setSource(selected.kind)
+      setResultSource(selected.kind)
+      setView('translation')
       setSide('ai')
     }
   }, [initialJobId, jobs.some((job) => job.id === initialJobId)])
   useEffect(() => {
     setSelection(null)
     setSearchTarget(null)
-  }, [source, latestJob?.id])
+  }, [view, latestJob?.id])
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -302,12 +372,22 @@ export function Reader({
       setPage(paper.currentPage)
       if (!initialJobId && paper.lastLocation) {
         setSource(paper.lastLocation.source)
+        if (paper.lastLocation.source !== 'original') {
+          setResultSource(paper.lastLocation.source)
+          setView('translation')
+        }
         setResultVersions((prev) => ({
           ...prev,
           [paper.lastLocation!.source]: paper.lastLocation!.jobId || '',
         }))
         if (paper.lastLocation.source === 'original') setPage(paper.lastLocation.page)
       }
+      setPdfJump({
+        page:
+          paper.lastLocation?.source === 'original' ? paper.lastLocation.page : paper.currentPage,
+        progress: paper.lastLocation?.source === 'original' ? paper.lastLocation.progress : 0,
+        token: Date.now(),
+      })
       initial.current = true
       void db.papers.update(id, {
         status: paper.status === 'unread' ? 'reading' : paper.status,
@@ -332,7 +412,12 @@ export function Reader({
     return () => document.removeEventListener('keydown', handle)
   }, [onClose, selection, editOpen, exportOpen, removeOpen])
   useEffect(() => {
-    if (pdfMode || !contentRef.current || latestJob?.status === 'running') return
+    if (
+      pdfMode ||
+      !contentRef.current ||
+      (source !== 'original' && latestJob?.status === 'running')
+    )
+      return
     const highlights = (CSS as any).highlights,
       HighlightCtor = (window as any).Highlight
     if (!highlights || !HighlightCtor) return
@@ -398,16 +483,20 @@ export function Reader({
     }
   }, [selectedAnnotation, source, latestJob?.id, text, ready, page, renderEpoch])
 
-  function navigate(next: number) {
+  function navigate(next: number, progress = 0) {
     if (!paper || next < 1 || next > paper.pageCount) return
     setPage(next)
     setSelection(null)
     void db.papers.update(id, { currentPage: next, lastReadAt: Date.now() })
-    document.querySelector('.reader-scroll')?.scrollTo({ top: 0 })
+    if (hasPdf) setPdfJump({ page: next, progress, token: Date.now() })
+    else originalScrollRef.current?.scrollTo({ top: 0 })
   }
-  function captureSelection() {
-    const native = window.getSelection(),
-      root = contentRef.current
+  function captureSelection(
+    root = contentRef.current,
+    selectedSource = source,
+    selectedPage = page,
+  ) {
+    const native = window.getSelection()
     if (
       !native ||
       native.isCollapsed ||
@@ -419,7 +508,7 @@ export function Reader({
     const range = native.getRangeAt(0),
       quote = range.toString()
     if (!quote.trim()) return
-    if (source !== 'original' && latestJob?.status !== 'completed') {
+    if (selectedSource !== 'original' && latestJob?.status !== 'completed') {
       toast('请等待全文处理完成后添加批注，避免内容接续时定位发生变化。')
       return
     }
@@ -437,7 +526,17 @@ export function Reader({
         width: clamp(r.width / rect.width),
         height: clamp(r.height / rect.height),
       }))
-    setSelection({ quote, rects, start, end: start + quote.length })
+    setSource(selectedSource)
+    setSelection({
+      quote,
+      rects,
+      start,
+      end: start + quote.length,
+      source: selectedSource,
+      page: selectedPage,
+      jobId: selectedSource === 'original' ? undefined : latestJob?.id,
+      pdf: selectedSource === 'original' && hasPdf,
+    })
     setComment('')
     setSide('annotations')
     setShowSide(true)
@@ -445,15 +544,13 @@ export function Reader({
   async function addAnnotation() {
     if (!selection) return
     try {
+      const { pdf, ...selected } = selection
       await db.annotations.add({
         id: uid(),
         paperId: id,
-        source,
-        page,
-        scope: source === 'original' ? undefined : 'document',
-        jobId: latestJob?.id,
-        ...selection,
-        rects: pdfMode ? selection.rects : [],
+        ...selected,
+        scope: selected.source === 'original' ? undefined : 'document',
+        rects: pdf ? selection.rects : [],
         comment,
         color,
         createdAt: Date.now(),
@@ -471,22 +568,20 @@ export function Reader({
       id: noteId,
       paperId: id,
       title: `${paper!.title} · 阅读笔记`,
-      markdown: `# ${paper!.title}\n\n${annotation ? `> ${annotation.quote.replace(/\n/g, '\n> ')}\n\n— ${annotation.scope === 'document' ? '全文' : `第 ${annotation.page} 页`} · ${annotation.source === 'original' ? '原文' : annotation.source === 'translation' ? '译文' : '重排'}\n\n${annotation.comment}\n\n` : '## 我的思考\n\n'}`,
+      markdown: `# ${paper!.title}\n\n${annotation ? `> ${annotation.quote.replace(/\n/g, '\n> ')}\n\n— ${annotation.scope === 'document' ? '全文' : `第 ${annotation.page} 页`} · ${annotation.source === 'original' ? '原文' : annotation.source === 'translation' ? '译文' : '历史文档'}\n\n${annotation.comment}\n\n` : '## 我的思考\n\n'}`,
       updatedAt: Date.now(),
     })
     onNote(noteId)
   }
-  async function start(kind: Job['kind']) {
+  async function startTranslation() {
+    const kind = 'translation' as const
     setAiBusy(true)
     try {
-      const job = await createJob(
-        id,
-        kind,
-        { ...config, bilingual },
-        kind === 'reflow' && reflowInput ? { jobId: reflowInput } : undefined,
-      )
+      const job = await createJob(id, kind, { ...config, bilingual })
       setResultVersions((prev) => ({ ...prev, [kind]: job.id }))
       setSource(kind)
+      setResultSource(kind)
+      setView((v) => (v === 'compare' ? v : 'translation'))
       void runJob(job.id)
       toast('任务已开始，完成的批次会自动保存')
     } catch (e) {
@@ -518,17 +613,117 @@ export function Reader({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 16 }}
     >
-      <header className="reader-header">
-        <button className="icon-button" onClick={onClose} aria-label="返回文献库">
-          <ArrowLeft size={20} />
+      {recognitionOpen && (
+        <RecognitionPanel
+          paper={paper}
+          config={config}
+          onClose={() => setRecognitionOpen(false)}
+          onStart={(job) => {
+            setResultVersions((prev) => ({ ...prev, reflow: job.id }))
+            setResultSource('reflow')
+            setSource('reflow')
+            setView('translation')
+            setSide('ai')
+            setShowSide(true)
+          }}
+        />
+      )}
+      {paper.referenceOnly && (
+        <div className="reference-notice">
+          此记录只有引用信息。
+          <button className="text-button" onClick={() => setEditOpen(true)}>
+            附加 PDF / 编辑元数据
+          </button>
+        </div>
+      )}
+      <div className="reader-toolbar unified-reader-toolbar" role="toolbar" aria-label="文献工具栏">
+        <button
+          className="icon-button"
+          onClick={onClose}
+          aria-label="返回文献库"
+          title="返回文献库"
+        >
+          <ArrowLeft size={19} />
         </button>
-        <span className="reader-logo">p.</span>
-        <div className="reader-heading">
-          <strong>{paper.title}</strong>
-          <span>
-            {paper.authors} · {paper.year || '年份待核验'}
-            {paper.sample && ' · 演示导读'}
-          </span>
+        <div className="reader-view-switch" role="group" aria-label="阅读视图">
+          {(
+            [
+              ['original', '原文', BookOpen],
+              ['translation', '译文', Languages],
+              ['compare', '对照', Columns2],
+            ] as const
+          ).map(([key, label, Icon]) => (
+            <button
+              key={key}
+              aria-pressed={view === key}
+              className={view === key ? 'active' : ''}
+              onClick={() => selectView(key)}
+            >
+              <Icon size={16} />
+              {label}
+            </button>
+          ))}
+        </div>
+        {view !== 'translation' ? (
+          <div className="page-controls">
+            <button
+              className="icon-button"
+              onClick={() => navigate(page - 1)}
+              disabled={page === 1}
+              aria-label="上一页"
+            >
+              <ChevronLeft size={17} />
+            </button>
+            <span>
+              <input
+                className="page-input"
+                type="number"
+                min={1}
+                max={paper.pageCount}
+                aria-label="跳转页码"
+                value={page}
+                onChange={(e) => navigate(Number(e.target.value))}
+              />{' '}
+              <small>/ {paper.pageCount}</small>
+            </span>
+            <button
+              className="icon-button"
+              onClick={() => navigate(page + 1)}
+              disabled={page === paper.pageCount}
+              aria-label="下一页"
+            >
+              <ChevronRight size={17} />
+            </button>
+          </div>
+        ) : (
+          <div className="document-mode-label">
+            连续 Markdown 文档{latestJob?.bilingual ? ' · 原文对照' : ''}
+          </div>
+        )}
+        {view !== 'original' && latestJob?.status === 'completed' && (
+          <button className="button small" onClick={() => setEditingResult(latestJob)}>
+            校对当前结果
+          </button>
+        )}
+        <div className="zoom-controls">
+          <button
+            className="icon-button"
+            onClick={() => changeZoom(Math.max(0.5, zoom - 0.1))}
+            aria-label="缩小"
+          >
+            <Minus size={14} />
+          </button>
+          <span>{Math.round(zoom * 100)}%</span>
+          <button
+            className="icon-button"
+            onClick={() => changeZoom(Math.min(2, zoom + 0.1))}
+            aria-label="放大"
+          >
+            <Plus size={14} />
+          </button>
+          <button className="icon-button" onClick={() => changeZoom(1)} aria-label="适应宽度">
+            <Maximize2 size={15} />
+          </button>
         </div>
         <div className="reader-header-actions">
           <button
@@ -570,112 +765,6 @@ export function Reader({
             <span>AI 阅读助手</span>
           </button>
         </div>
-      </header>
-      {recognitionOpen && (
-        <RecognitionPanel
-          paper={paper}
-          config={config}
-          onClose={() => setRecognitionOpen(false)}
-          onStart={(job) => {
-            setResultVersions((prev) => ({ ...prev, reflow: job.id }))
-            setSource('reflow')
-            setSide('ai')
-            setShowSide(true)
-          }}
-        />
-      )}
-      {paper.referenceOnly && (
-        <div className="reference-notice">
-          此记录只有引用信息。
-          <button className="text-button" onClick={() => setEditOpen(true)}>
-            附加 PDF / 编辑元数据
-          </button>
-        </div>
-      )}
-      <div className="reader-toolbar">
-        <div className="reader-mode-tabs">
-          {[
-            ['original', '原文', BookOpen],
-            ['translation', '智能翻译', Languages],
-            ['reflow', '智能重排', Sparkles],
-          ].map(([k, t, I]) => {
-            const Icon = I as typeof BookOpen
-            return (
-              <button
-                key={k as string}
-                className={source === k ? 'active' : ''}
-                onClick={() => {
-                  setSource(k as Source)
-                  setSelection(null)
-                }}
-              >
-                <Icon size={15} />
-                {t as string}
-              </button>
-            )
-          })}
-        </div>
-        {source === 'original' ? (
-          <div className="page-controls">
-            <button
-              className="icon-button"
-              onClick={() => navigate(page - 1)}
-              disabled={page === 1}
-              aria-label="上一页"
-            >
-              <ChevronLeft size={17} />
-            </button>
-            <span>
-              <input
-                className="page-input"
-                type="number"
-                min={1}
-                max={paper.pageCount}
-                aria-label="跳转页码"
-                value={page}
-                onChange={(e) => navigate(Number(e.target.value))}
-              />{' '}
-              <small>/ {paper.pageCount}</small>
-            </span>
-            <button
-              className="icon-button"
-              onClick={() => navigate(page + 1)}
-              disabled={page === paper.pageCount}
-              aria-label="下一页"
-            >
-              <ChevronRight size={17} />
-            </button>
-          </div>
-        ) : (
-          <div className="document-mode-label">
-            连续 Markdown 文档{latestJob?.bilingual ? ' · 原文对照' : ''}
-          </div>
-        )}
-        {latestJob?.status === 'completed' && (
-          <button className="button small" onClick={() => setEditingResult(latestJob)}>
-            校对当前结果
-          </button>
-        )}
-        <div className="zoom-controls">
-          <button
-            className="icon-button"
-            onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-            aria-label="缩小"
-          >
-            <Minus size={14} />
-          </button>
-          <span>{Math.round(zoom * 100)}%</span>
-          <button
-            className="icon-button"
-            onClick={() => setZoom(Math.min(2, zoom + 0.1))}
-            aria-label="放大"
-          >
-            <Plus size={14} />
-          </button>
-          <button className="icon-button" onClick={() => setZoom(1)} aria-label="适应宽度">
-            <Maximize2 size={15} />
-          </button>
-        </div>
         <button
           className={`icon-button ${showSide ? 'selected' : ''}`}
           onClick={() => setShowSide(!showSide)}
@@ -685,123 +774,181 @@ export function Reader({
         </button>
       </div>
       <div className={`reader-body ${showSide ? '' : 'side-hidden'}`}>
-        <div className="reader-scroll" ref={scrollRef} onScroll={onScroll}>
-          {paper.sample && (
-            <div className="demo-notice">演示导读 · 请导入原始 PDF 阅读完整文献</div>
-          )}
-          {source !== 'original' && latestJob?.sourceWarning && (
-            <div className="demo-notice">{latestJob.sourceWarning}</div>
-          )}
-          {pdfMode ? (
-            <PdfPage
-              id={id}
-              page={page}
-              zoom={zoom}
-              annotations={annotations.filter((a) => a.source === 'original' && a.page === page)}
-              contentRef={contentRef}
-              onSelect={captureSelection}
-              onReady={onPdfReady}
-              onOutline={onOutline}
-            />
-          ) : text ? (
-            <div
-              className="reading-paper"
-              style={{ '--reading-zoom': zoom } as React.CSSProperties}
+        <div className={`reader-panes view-${view}`}>
+          {view !== 'translation' && (
+            <section
+              className="document-pane original-pane"
+              aria-label="原文窗口"
+              onPointerDown={() => setSource('original')}
+              onFocusCapture={() => setSource('original')}
+              onWheel={() => setSource('original')}
             >
-              <div className="reading-page-label">
-                {source === 'original'
-                  ? 'ORIGINAL'
-                  : source === 'translation'
-                    ? 'TRANSLATION'
-                    : 'REFLOW'}
-                <span>
-                  {source === 'original'
-                    ? `PAGE ${String(page).padStart(2, '0')}`
-                    : '完整文档 · MARKDOWN'}
-                </span>
-              </div>
+              <div className="pane-heading">{paper.sample ? '原文导读' : '原文 PDF'}</div>
               <div
-                ref={contentRef}
-                onMouseUp={captureSelection}
-                onTouchEnd={() => setTimeout(captureSelection, 150)}
+                className="reader-scroll pdf-scroll"
+                ref={originalScrollRef}
+                onScroll={originalReading.onScroll}
+                tabIndex={0}
               >
-                {source === 'original' ? (
-                  <Markdown text={text} />
-                ) : latestJob?.status === 'running' ? (
-                  <>
-                    <Markdown text={preview.committed} />
-                    {preview.draft && (
-                      <div className="document-draft">
-                        <Markdown text={preview.draft} />
-                      </div>
-                    )}
-                  </>
-                ) : latestJob && latestJob.documentVersion !== 2 ? (
-                  [...new Set(latestJob.chunks.map((chunk) => chunk.page))].map((sourcePage) => (
-                    <div key={sourcePage} data-legacy-page={sourcePage}>
-                      <Markdown
-                        text={latestJob.chunks
-                          .filter((chunk) => chunk.page === sourcePage)
-                          .map((chunk) => chunk.output || '_[未完成的正文]_')
-                          .join('\n\n')}
-                      />
-                    </div>
-                  ))
+                {hasPdf ? (
+                  <ContinuousPdf
+                    id={id}
+                    pageCount={paper.pageCount}
+                    page={page}
+                    zoom={zoom}
+                    annotations={annotations}
+                    scrollRef={originalScrollRef}
+                    jump={pdfJump}
+                    onPage={setPage}
+                    onReady={onPdfReady}
+                    onOutline={onOutline}
+                    onActiveElement={onActiveElement}
+                    onSelect={(number, element) => captureSelection(element, 'original', number)}
+                  />
                 ) : (
-                  <Markdown text={fullResult} />
+                  <div
+                    className="reading-paper"
+                    style={{ '--reading-zoom': zoom } as React.CSSProperties}
+                  >
+                    <p className="demo-notice">
+                      {paper.sample
+                        ? '演示导读 · 请导入原始 PDF 阅读完整文献'
+                        : '此引用记录尚未附加 PDF'}
+                    </p>
+                    <div
+                      ref={originalContentRef}
+                      onMouseUp={() =>
+                        captureSelection(originalContentRef.current, 'original', page)
+                      }
+                      onTouchEnd={() =>
+                        setTimeout(
+                          () => captureSelection(originalContentRef.current, 'original', page),
+                          150,
+                        )
+                      }
+                    >
+                      <Markdown text={pages.find((p) => p.number === page)?.text || ''} />
+                    </div>
+                  </div>
                 )}
               </div>
-              {parallelPreview.length > 0 && (
-                <div className="parallel-preview" aria-label="并行内容预览">
-                  <p className="field-hint">后续内容已返回，可先预览；全文会按原文顺序自动合并。</p>
-                  {parallelPreview.map(({ index, content }) => (
-                    <details key={index} open>
-                      <summary>并行预览 · 批次 {index + 1}</summary>
-                      <Markdown text={content} />
-                    </details>
-                  ))}
-                </div>
-              )}
-              {source === 'original' ? (
-                <div className="reading-page-number">— {page} —</div>
-              ) : (
-                latestJob?.status === 'running' && (
-                  <div className="document-progress-note">
-                    {preview.waiting
-                      ? '后续内容已完成，正在等待前文；全文将按原文顺序接续。'
-                      : '内容正在接续生成，已完成部分会自动保存。'}
-                  </div>
-                )
-              )}
-            </div>
-          ) : (
-            <div className="empty-state reader-empty">
-              <span className="feature-icon">
-                <Sparkles size={28} />
-              </span>
-              <h3>
-                {source === 'translation' ? '跨越语言，靠近知识' : '给复杂的论文，一次清晰的表达'}
-              </h3>
-              <p>
-                {latestJob?.status === 'running'
-                  ? '正在处理全文，内容将按原文顺序连续显示。'
-                  : latestJob
-                    ? '暂无结果，可在右侧继续未完成的任务。'
-                    : source === 'translation'
-                      ? `将文献翻译为${config.targetLanguage}，汇总为一份连续 Markdown 文档。`
-                      : '把提取的文本整理为层次清晰的 Markdown。'}
-              </p>
-              <button
-                className="button primary"
-                onClick={() => {
-                  setSide('ai')
-                  setShowSide(true)
-                }}
+            </section>
+          )}
+          {view !== 'original' && (
+            <section
+              className="document-pane translation-pane"
+              aria-label="译文窗口"
+              onPointerDown={() => setSource(resultSource)}
+              onFocusCapture={() => setSource(resultSource)}
+              onWheel={() => setSource(resultSource)}
+            >
+              <div className="pane-heading">
+                {resultSource === 'translation' ? '翻译结果' : '历史文档 / 识别结果'}
+              </div>
+              <div
+                className="reader-scroll translation-scroll"
+                ref={translationScrollRef}
+                onScroll={resultReading.onScroll}
+                tabIndex={0}
               >
-                <Sparkles size={15} />
-                打开 AI 助手
-              </button>
-            </div>
+                {latestJob?.sourceWarning && (
+                  <div className="demo-notice">{latestJob.sourceWarning}</div>
+                )}
+                {fullResult || preview.committed || preview.draft || parallelPreview.length ? (
+                  <div
+                    className="reading-paper"
+                    style={{ '--reading-zoom': zoom } as React.CSSProperties}
+                  >
+                    <div className="reading-page-label">
+                      {resultSource === 'translation' ? 'TRANSLATION' : 'DOCUMENT'}
+                      <span>完整文档 · MARKDOWN</span>
+                    </div>
+                    <div
+                      ref={translationContentRef}
+                      onMouseUp={() =>
+                        captureSelection(translationContentRef.current, resultSource, 1)
+                      }
+                      onTouchEnd={() =>
+                        setTimeout(
+                          () => captureSelection(translationContentRef.current, resultSource, 1),
+                          150,
+                        )
+                      }
+                    >
+                      {latestJob?.status === 'running' ? (
+                        <>
+                          <Markdown text={preview.committed} />
+                          {preview.draft && (
+                            <div className="document-draft">
+                              <Markdown text={preview.draft} />
+                            </div>
+                          )}
+                        </>
+                      ) : latestJob && latestJob.documentVersion !== 2 ? (
+                        [...new Set(latestJob.chunks.map((chunk) => chunk.page))].map(
+                          (sourcePage) => (
+                            <div key={sourcePage} data-legacy-page={sourcePage}>
+                              <Markdown
+                                text={latestJob.chunks
+                                  .filter((chunk) => chunk.page === sourcePage)
+                                  .map((chunk) => chunk.output || '_[未完成的正文]_')
+                                  .join('\n\n')}
+                              />
+                            </div>
+                          ),
+                        )
+                      ) : (
+                        <Markdown text={fullResult} />
+                      )}
+                    </div>
+                    {parallelPreview.length > 0 && (
+                      <div className="parallel-preview" aria-label="并行内容预览">
+                        <p className="field-hint">
+                          后续内容已返回，可先预览；全文会按原文顺序自动合并。
+                        </p>
+                        {parallelPreview.map(({ index, content }) => (
+                          <details key={index} open>
+                            <summary>并行预览 · 批次 {index + 1}</summary>
+                            <Markdown text={content} />
+                          </details>
+                        ))}
+                      </div>
+                    )}
+                    {latestJob?.status === 'running' && (
+                      <div className="document-progress-note">
+                        {preview.waiting
+                          ? '后续内容已完成，正在等待前文；全文将按原文顺序接续。'
+                          : '内容正在接续生成，已完成部分会自动保存。'}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="empty-state reader-empty">
+                    <span className="feature-icon">
+                      <Sparkles size={28} />
+                    </span>
+                    <h3>尚未生成译文</h3>
+                    <p>
+                      {latestJob?.status === 'running'
+                        ? '正在处理全文，内容将按原文顺序连续显示。'
+                        : latestJob
+                          ? '暂无结果，可在右侧继续未完成的任务。'
+                          : `打开 AI 助手，将文献翻译为${config.targetLanguage}，生成连续 Markdown。`}
+                    </p>
+                    <button
+                      className="button primary"
+                      onClick={() => {
+                        setSide('ai')
+                        setShowSide(true)
+                      }}
+                    >
+                      <Sparkles size={15} />
+                      打开 AI 助手
+                    </button>
+                  </div>
+                )}
+              </div>
+            </section>
           )}
         </div>
         {showSide && (
@@ -872,7 +1019,7 @@ export function Reader({
                       <option value="all">所有来源与版本</option>
                       <option value="original">原文</option>
                       <option value="translation">译文</option>
-                      <option value="reflow">重排</option>
+                      <option value="reflow">历史文档</option>
                       <option value="current">当前来源与版本</option>
                     </select>
                     <button
@@ -935,7 +1082,7 @@ export function Reader({
                         <Highlighter size={32} />
                       </div>
                       <h3>划下重点，留下想法</h3>
-                      <p>在原文、译文或重排内容中选中文字，即可高亮和添加批注。</p>
+                      <p>在原文或译文中选中文字，即可高亮和添加批注。</p>
                     </div>
                   )}
                   {[...filteredAnnotations]
@@ -947,6 +1094,14 @@ export function Reader({
                             onClick={() => {
                               setResultVersions((prev) => ({ ...prev, [a.source]: a.jobId || '' }))
                               setSource(a.source)
+                              if (a.source !== 'original') setResultSource(a.source)
+                              setView((v) =>
+                                v === 'compare'
+                                  ? v
+                                  : a.source === 'original'
+                                    ? 'original'
+                                    : 'translation',
+                              )
                               if (a.source === 'original') navigate(a.page)
                               setSelectedAnnotation(a)
                             }}
@@ -956,7 +1111,7 @@ export function Reader({
                               ? '原文'
                               : a.source === 'translation'
                                 ? '译文'
-                                : '重排'}
+                                : '历史文档'}
                           </button>
                           <button
                             className="icon-button"
@@ -1039,44 +1194,9 @@ export function Reader({
                     <button
                       className="button primary full-width"
                       disabled={aiBusy || jobs.some((j) => j.status === 'running')}
-                      onClick={() => void start('translation')}
+                      onClick={() => void startTranslation()}
                     >
                       开始翻译 <ArrowRight size={14} />
-                    </button>
-                  </div>
-                  <div className="ai-action-card">
-                    <Sparkles size={21} />
-                    <h4>智能重排</h4>
-                    <p>整理段落与标题，输出更适合屏幕阅读的 Markdown。</p>
-                    <label className="field">
-                      重排输入来源
-                      <select
-                        aria-label="重排输入来源"
-                        value={reflowInput}
-                        disabled={aiBusy}
-                        onChange={(e) => setReflowInput(e.target.value)}
-                      >
-                        <option value="">原文 PDF 提取文本</option>
-                        {jobs
-                          .filter((j) => j.status === 'completed')
-                          .map((j) => (
-                            <option key={j.id} value={j.id}>
-                              {resultName(j)}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
-                    <p className="field-hint">
-                      {reflowInput
-                        ? '使用所选版本的完整 Markdown，保留该版本的语言及对照引用。校对请先保存为新版本。'
-                        : '使用原文提取文本，保持原文语言。'}
-                    </p>
-                    <button
-                      className="button full-width"
-                      disabled={aiBusy || jobs.some((j) => j.status === 'running')}
-                      onClick={() => void start('reflow')}
-                    >
-                      开始重排 <ArrowRight size={14} />
                     </button>
                   </div>
                   <p className="field-hint">
@@ -1103,7 +1223,9 @@ export function Reader({
                         config={{ ...config, bilingual }}
                         onRestart={(next) => {
                           setResultVersions((prev) => ({ ...prev, [next.kind]: next.id }))
+                          setResultSource(next.kind)
                           setSource(next.kind)
+                          setView((v) => (v === 'compare' ? v : 'translation'))
                         }}
                         onView={() => {
                           setResultVersions((prev) => ({ ...prev, [job.kind]: job.id }))
@@ -1128,7 +1250,6 @@ export function Reader({
             onSaved={(job) => {
               setEditingResult(null)
               showResult(job)
-              setReflowInput(job.id)
             }}
           />
         )}
@@ -1211,7 +1332,7 @@ export function Reader({
                 ? '原文提取文本'
                 : source === 'translation'
                   ? '智能译文'
-                  : '重排内容'}
+                  : '历史文档'}
               {latestJob && latestJob.status !== 'completed' && '（未完成，仅导出已有批次）'}
             </p>
             <div className="export-options">
@@ -1332,181 +1453,6 @@ export function Reader({
   )
 }
 
-function PdfPage({
-  id,
-  page,
-  zoom,
-  annotations,
-  contentRef,
-  onSelect,
-  onReady,
-  onOutline,
-}: {
-  id: string
-  page: number
-  zoom: number
-  annotations: Annotation[]
-  contentRef: React.RefObject<HTMLDivElement | null>
-  onSelect: () => void
-  onReady: (page: number) => void
-  onOutline: (entries: OutlineEntry[]) => void
-}) {
-  const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null),
-    [error, setError] = useState(''),
-    [loading, setLoading] = useState(true),
-    [width, setWidth] = useState(760)
-  const wrapper = useRef<HTMLDivElement>(null),
-    canvas = useRef<HTMLCanvasElement>(null),
-    layer = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    let disposed = false,
-      task: ReturnType<typeof getDocument> | undefined
-    void (async () => {
-      try {
-        const asset = await db.assets.get(id)
-        if (!asset?.pdf) throw new Error('PDF 文件缺失，请从备份恢复。')
-        task = getDocument({ data: await asset.pdf.arrayBuffer() })
-        const loaded = await task.promise
-        if (disposed) await task.destroy()
-        else {
-          setPdf(loaded)
-          const entries: OutlineEntry[] = []
-          const walk = async (
-            items: Awaited<ReturnType<PDFDocumentProxy['getOutline']>>,
-            depth = 0,
-          ) => {
-            for (const item of items || []) {
-              if (entries.length >= 1000) break
-              let page: number | undefined
-              try {
-                const dest =
-                  typeof item.dest === 'string' ? await loaded.getDestination(item.dest) : item.dest
-                if (Array.isArray(dest) && dest[0] !== undefined)
-                  page =
-                    (typeof dest[0] === 'number' ? dest[0] : await loaded.getPageIndex(dest[0])) + 1
-              } catch {
-                /* An invalid outline item remains visible but disabled. */
-              }
-              entries.push({ title: item.title, depth, page })
-              if (depth < 10) await walk(item.items, depth + 1)
-            }
-          }
-          await walk(await loaded.getOutline().catch(() => []))
-          if (!disposed) onOutline(entries)
-        }
-      } catch (e) {
-        if (!disposed) setError(errorMessage(e))
-      }
-    })()
-    return () => {
-      disposed = true
-      void task?.destroy()
-    }
-  }, [id, onOutline])
-  useEffect(() => {
-    if (!wrapper.current) return
-    const resize = new ResizeObserver((entries) =>
-      setWidth(Math.min(920, entries[0].contentRect.width)),
-    )
-    resize.observe(wrapper.current)
-    return () => resize.disconnect()
-  }, [])
-  useEffect(() => {
-    if (!pdf || !canvas.current || !layer.current || !contentRef.current) return
-    let disposed = false,
-      render: ReturnType<Awaited<ReturnType<PDFDocumentProxy['getPage']>>['render']> | undefined,
-      textLayer: TextLayer | undefined
-    const targetCanvas = canvas.current,
-      targetLayer = layer.current,
-      surface = contentRef.current
-    setLoading(true)
-    setError('')
-    void (async () => {
-      try {
-        const pdfPage = await pdf.getPage(page)
-        if (disposed) return
-        const viewport = pdfPage.getViewport({
-          scale: (Math.max(280, width) / pdfPage.getViewport({ scale: 1 }).width) * zoom,
-        })
-        const ratio = Math.min(window.devicePixelRatio || 1, 2)
-        targetCanvas.width = Math.floor(viewport.width * ratio)
-        targetCanvas.height = Math.floor(viewport.height * ratio)
-        targetCanvas.style.width = `${viewport.width}px`
-        targetCanvas.style.height = `${viewport.height}px`
-        surface.style.width = `${viewport.width}px`
-        surface.style.height = `${viewport.height}px`
-        surface.style.setProperty('--scale-factor', String(viewport.scale))
-        surface.style.setProperty('--total-scale-factor', String(viewport.scale))
-        surface.style.setProperty('--user-unit', '1')
-        targetLayer.replaceChildren()
-        render = pdfPage.render({
-          canvas: targetCanvas,
-          viewport,
-          transform: ratio === 1 ? undefined : [ratio, 0, 0, ratio, 0, 0],
-        })
-        await render.promise
-        if (disposed) return
-        textLayer = new TextLayer({
-          textContentSource: await pdfPage.getTextContent(),
-          container: targetLayer,
-          viewport,
-        })
-        await textLayer.render()
-        if (!disposed) {
-          setLoading(false)
-          onReady(page)
-        }
-      } catch (e) {
-        if (!disposed && !(e instanceof Error && e.name === 'RenderingCancelledException')) {
-          setError(errorMessage(e))
-          setLoading(false)
-        }
-      }
-    })()
-    return () => {
-      disposed = true
-      render?.cancel()
-      textLayer?.cancel()
-    }
-  }, [pdf, page, width, zoom, contentRef, onReady])
-  return (
-    <div ref={wrapper} className="pdf-wrapper">
-      {error && <div className="error-box">{error}</div>}
-      {loading && !error && (
-        <div className="pdf-loading">
-          <Spinner text="正在渲染 PDF…" />
-        </div>
-      )}
-      <div
-        ref={contentRef}
-        className="pdf-surface"
-        onMouseUp={onSelect}
-        onTouchEnd={() => setTimeout(onSelect, 150)}
-      >
-        <canvas ref={canvas} />
-        <div ref={layer} className="textLayer" />
-        <div className="pdf-highlights">
-          {annotations.flatMap((a) =>
-            a.rects.map((r, i) => (
-              <span
-                key={`${a.id}-${i}`}
-                title={a.comment || a.quote}
-                className={`highlight-${a.color}`}
-                style={{
-                  left: `${r.x * 100}%`,
-                  top: `${r.y * 100}%`,
-                  width: `${r.width * 100}%`,
-                  height: `${r.height * 100}%`,
-                }}
-              />
-            )),
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export function JobCard({
   job,
   onView,
@@ -1573,7 +1519,7 @@ export function JobCard({
             ? '文字与版面识别'
             : job.kind === 'translation'
               ? '智能翻译'
-              : '智能重排'}
+              : '历史文档'}
         </span>
         <small>
           {
@@ -1651,7 +1597,8 @@ export function JobCard({
             暂停
           </button>
         ) : (
-          job.status !== 'completed' && (
+          job.status !== 'completed' &&
+          (job.kind === 'translation' || job.recognition) && (
             <button className="text-button" onClick={() => void runJob(job.id, config)}>
               <RotateCcw size={12} />
               {changed ? '继续原任务' : '继续'}
@@ -1659,7 +1606,7 @@ export function JobCard({
           )
         )}
       </div>
-      {job.status !== 'running' && !job.recognition && (
+      {job.status !== 'running' && !job.recognition && job.kind === 'translation' && (
         <button
           className="button small full-width"
           disabled={restarting}
