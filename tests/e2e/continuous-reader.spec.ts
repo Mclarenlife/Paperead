@@ -173,6 +173,13 @@ test('comparison shows independent PDF and translation panes; annotations retain
   await page.getByLabel('批注内容').fill('Translation pane annotation')
   await page.getByRole('button', { name: '保存批注', exact: true }).click()
   await expect(page.locator('.annotation-card')).toContainText('全文 · 译文')
+  await expect
+    .poll(() => page.evaluate(() => (CSS as any).highlights.get('paper-yellow')?.size))
+    .toBe(1)
+  await page.locator('.pdf-scroll').dispatchEvent('wheel', { deltaY: 10 })
+  await expect
+    .poll(() => page.evaluate(() => (CSS as any).highlights.get('paper-yellow')?.size))
+    .toBe(1)
   await page.getByRole('button', { name: '切换批注面板', exact: true }).click()
   await expect(page.locator('.toast')).toHaveCount(0, { timeout: 12_000 })
   await page.screenshot({ path: '.tmp/comparison-0.1.11-light.png', animations: 'disabled' })

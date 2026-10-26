@@ -355,6 +355,9 @@ export function Reader({
     setSelection(null)
     setSearchTarget(null)
   }, [view, latestJob?.id])
+  useEffect(() => {
+    setSearchTarget(null)
+  }, [source])
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -412,39 +415,52 @@ export function Reader({
     return () => document.removeEventListener('keydown', handle)
   }, [onClose, selection, editOpen, exportOpen, removeOpen])
   useEffect(() => {
-    if (
-      pdfMode ||
-      !contentRef.current ||
-      (source !== 'original' && latestJob?.status === 'running')
-    )
-      return
     const highlights = (CSS as any).highlights,
       HighlightCtor = (window as any).Highlight
     if (!highlights || !HighlightCtor) return
-    for (const c of ['yellow', 'green', 'purple']) {
+    for (const color of ['yellow', 'green', 'purple']) {
       const ranges = annotations
-        .filter(
-          (a) =>
-            a.source === source &&
-            (source !== 'original' || a.page === page) &&
-            a.color === c &&
-            a.start !== undefined &&
-            (!a.jobId || a.jobId === latestJob?.id),
-        )
+        .filter((a) => a.color === color && a.start !== undefined)
         .flatMap((a) => {
-          const root =
-            a.source !== 'original' && a.scope !== 'document'
-              ? contentRef.current!.querySelector<HTMLElement>(`[data-legacy-page="${a.page}"]`)
-              : contentRef.current!
+          let root: HTMLElement | null = null
+          if (a.source === 'original') {
+            if (hasPdf || view === 'translation' || a.page !== page) return []
+            root = originalContentRef.current
+          } else {
+            if (
+              view === 'original' ||
+              a.source !== resultSource ||
+              latestJob?.status === 'running' ||
+              (a.jobId && a.jobId !== latestJob?.id)
+            )
+              return []
+            root =
+              a.scope !== 'document'
+                ? translationContentRef.current?.querySelector<HTMLElement>(
+                    `[data-legacy-page="${a.page}"]`,
+                  ) || null
+                : translationContentRef.current
+          }
           const range = root ? locateRange(root, a.start!, a.end!) : null
           return range && range.toString() === a.quote ? [range] : []
         })
-      highlights.set(`paper-${c}`, new HighlightCtor(...ranges))
+      highlights.set(`paper-${color}`, new HighlightCtor(...ranges))
     }
     return () => {
-      for (const c of ['yellow', 'green', 'purple']) highlights.delete(`paper-${c}`)
+      for (const color of ['yellow', 'green', 'purple']) highlights.delete(`paper-${color}`)
     }
-  }, [annotations, source, page, text, pdfMode, latestJob?.id, latestJob?.status])
+  }, [
+    annotations,
+    view,
+    resultSource,
+    page,
+    hasPdf,
+    fullResult,
+    renderEpoch,
+    latestJob?.id,
+    latestJob?.status,
+  ])
+
   useEffect(() => {
     const annotation = selectedAnnotation
     if (
