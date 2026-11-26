@@ -2,11 +2,15 @@
 
 **让阅读，沉淀为知识。** 一个使用 Tauri 2、React 19 与 TypeScript 构建的本地优先论文阅读工作台。
 
-这是可运行的 **0.1.11 测试版**：阅读器合并为单行工具栏，标题与作者不再重复显示；提供原文、译文、对照三种视图。PDF 可连续下滑，按可视区域绘制页面；原译文窗口独立滚动，支持跨页定位、批注和阅读位置恢复。智能重排功能已移除，已有历史结果保留可读可导出，扫描件识别继续保留。详见 [本轮阅读器改进](docs/READER-0.1.11.md)。沿用黑白灰与蓝色交互配色、较大的阅读字号和可收起侧栏。本轮提供 Windows、Android ARM64 和 macOS 通用版测试安装包；完整真机使用仍需验收，iOS 尚未打包，不包含云同步。
+**0.1.12 测试版**修复了翻译中断和部分公式排版错误。模型漏掉、重复或挪动了公式标记时，应用会补译受影响批次的文字，并按原文位置放回公式。仍然无法对齐的批次会显示页码，其他批次可以继续。阅读器支持原文、译文和对照视图。 [阅读器说明](docs/READER-0.1.11.md)
 
-Android 测试包：`release/Paperead_0.1.11_Android-arm64-test.apk`（release 优化、测试签名，最低 API 26）。macOS 测试包：`release/Paperead_0.1.11_macOS-universal.dmg`（Apple Silicon / Intel，ad-hoc 签名，未公证）。安装与构建说明见 [原生平台文档](docs/NATIVE-PLATFORMS.md)；macOS 产物也可从 [GitHub Actions](https://github.com/Mclarenlife/Paperead/actions/workflows/macos-installer.yml) 下载。
+升级后，在未完成的任务上点「继续」可接着已有译文翻译。若旧译文已从 PDF 读错上下标，点「使用当前配置重新处理」会用新版提取逻辑创建译文版本。对照 PDF 后仍无法辨认的复杂公式，可以先对相关页进行视觉版面解析。
 
-Windows 安装包：`release/Paperead_0.1.11_x64-setup.exe`（未签名开发版）。关闭旧版后运行安装包升级，资料保留；旧译文需点击“使用当前配置重新处理”应用新的分段和公式保护。缺少 WebView2 时需要联网安装运行时。详见 [本次修复与验收](docs/AI-0.1.6.md)、[Windows 打包](docs/WINDOWS-BUILD.md)、[其他平台](docs/NATIVE-PLATFORMS.md)。
+| 测试平台 | 本地安装包 |
+| --- | --- |
+| Windows x64 | `release/Paperead_0.1.12_x64-setup.exe`，未签名，需要 WebView2 |
+| Android ARM64 | `release/Paperead_0.1.12_Android-arm64-test.apk`，沿用本地测试签名，最低 API 26 |
+| macOS Apple Silicon / Intel | `release/Paperead_0.1.12_macOS-universal.dmg`，ad-hoc 签名，未公证 |
 
 每轮代码或界面修改验证后重新生成测试包，保留旧包；只使用本地安装包及 Actions 临时构建产物，不发布 GitHub Release。详见 [项目交付约定](AGENTS.md)。
 

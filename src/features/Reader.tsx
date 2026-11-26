@@ -1569,15 +1569,19 @@ export function JobCard({
         <p className="job-live" role="status">
           {job.recognition?.engine === 'local'
             ? inFlight.map((f) => f.text).join(' ')
-            : inFlight.some((fragment) => fragment.received)
-              ? '正在接收模型输出'
-              : inFlight.some((fragment) => fragment.phase === 'thinking')
-                ? '模型正在思考，尚未返回正文'
-                : inFlight.some((fragment) => fragment.phase === 'buffering')
-                  ? '服务商未使用流式，等待完整正文'
-                  : inFlight.length && inFlight.every((fragment) => fragment.phase === 'queued')
-                    ? '正在排队，等待请求名额'
-                    : '正在等待模型响应'}
+            : inFlight.some((fragment) => fragment.phase === 'repairing')
+              ? '正在补译正文并核对公式位置'
+              : inFlight.some((fragment) => fragment.phase === 'reconnecting')
+                ? '连接中断，正在重试当前批次'
+                : inFlight.some((fragment) => fragment.received)
+                  ? '正在接收模型输出'
+                  : inFlight.some((fragment) => fragment.phase === 'thinking')
+                    ? '模型正在思考，尚未返回正文'
+                    : inFlight.some((fragment) => fragment.phase === 'buffering')
+                      ? '服务商未使用流式，等待完整正文'
+                      : inFlight.length && inFlight.every((fragment) => fragment.phase === 'queued')
+                        ? '正在排队，等待请求名额'
+                        : '正在等待模型响应'}
           {' · '}
           {Math.max(0, Math.floor((now - activity.startedAt) / 1000))} 秒{' · '}当前批次已生成{' '}
           {inFlight.reduce((sum, fragment) => sum + fragment.text.length, 0)} 字符

@@ -6,6 +6,7 @@ import 'katex/dist/katex.min.css'
 import { memo, useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../lib/db'
+import { normalizeMathForRendering } from '../lib/academic-markdown'
 
 function LocalImage({ id, alt }: { id: string; alt?: string }) {
   const attachment = useLiveQuery(() => db.attachments.get(id), [id]),
@@ -57,7 +58,7 @@ export const Markdown = memo(function Markdown({
             ),
         }}
       >
-        {text}
+        {normalizeMathForRendering(text)}
       </ReactMarkdown>
     </div>
   )

@@ -7,7 +7,7 @@ import type { DocumentInitParameters } from 'pdfjs-dist/types/src/display/api'
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'
 import { db } from './db'
 import { uid } from './utils'
-import { extractPdfLayout } from './pdf-layout'
+import { extractPdfLayout, PDF_EXTRACTION_VERSION } from './pdf-layout'
 import type { Page, Paper } from '../types'
 import { abstractFromText, detectDoi } from './metadata'
 
@@ -68,7 +68,7 @@ export async function importPdf(
         paperId: id,
         number,
         text,
-        extractionVersion: 3,
+        extractionVersion: PDF_EXTRACTION_VERSION,
         extractionWarnings: warnings,
       })
       if (number === 1) {
@@ -165,7 +165,7 @@ export function refreshDocumentPages(paperId: string): Promise<Page[]> {
         const existing = existingPages.find((p) => p.number === number)
         // Recognition is authoritative: never overwrite OCR / vision with a
         // newer text-layer extractor when another page needs upgrading.
-        if (existing?.recognition || existing?.extractionVersion === 3) {
+        if (existing?.recognition || existing?.extractionVersion === PDF_EXTRACTION_VERSION) {
           pages.push(existing)
           continue
         }
@@ -180,7 +180,7 @@ export function refreshDocumentPages(paperId: string): Promise<Page[]> {
           paperId,
           number,
           text: result.text,
-          extractionVersion: 3,
+          extractionVersion: PDF_EXTRACTION_VERSION,
           extractionWarnings: result.warnings,
         })
         page.cleanup()

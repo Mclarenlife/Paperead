@@ -4,8 +4,8 @@ import { markdownTree, nodeText, type MarkdownNode } from './markdown-tree'
 import { embeddedImageBlob } from './note-library'
 import { escapeHtml } from './utils'
 
-export function formulaOmml(tex: string) {
-  const html = katex.renderToString(tex, { output: 'mathml', throwOnError: true })
+export function formulaOmml(tex: string, displayMode = false) {
+  const html = katex.renderToString(tex, { output: 'mathml', displayMode, throwOnError: true })
   const doc = new DOMParser().parseFromString(html, 'text/html')
   const convert = (node: Element): string => {
     const kids = [...node.children],
@@ -63,7 +63,7 @@ async function inlines(
   for (const node of nodes) {
     if (node.type === 'inlineMath' || node.type === 'math') {
       const root = new DOMParser().parseFromString(
-        formulaOmml(node.value || ''),
+        formulaOmml(node.value || '', node.type === 'math'),
         'application/xml',
       ).documentElement
       const component = (element: Element): word.ImportedXmlComponent => {

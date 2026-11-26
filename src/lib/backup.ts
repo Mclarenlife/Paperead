@@ -61,7 +61,7 @@ export const backupSchema = z.object({
       paperId: id,
       number: z.number().int().positive(),
       text,
-      extractionVersion: z.union([z.literal(2), z.literal(3)]).optional(),
+      extractionVersion: z.union([z.literal(2), z.literal(3), z.literal(4)]).optional(),
       extractionWarnings: z.array(z.string().max(500)).max(20).optional(),
       recognition: z
         .object({

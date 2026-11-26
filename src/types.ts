@@ -40,7 +40,7 @@ export interface Page {
   paperId: string
   number: number
   text: string
-  extractionVersion?: 2 | 3
+  extractionVersion?: 2 | 3 | 4
   extractionWarnings?: string[]
   recognition?: {
     engine: 'local' | 'vision'

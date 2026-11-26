@@ -8,6 +8,7 @@ const heading = (line: string) =>
   )
 const list = (line: string) => /^(?:[-*+]\s|\d+[.)]\s|\[\d+\]\s|>\s|\|)/.test(line)
 const sentenceEnd = (text: string) => /[.!?。！？:：;；]["'”’）)\]]*$/.test(text)
+const displayOrFence = /^(?:\$\$|\\\[|\\begin\{|`{3,}|~{3,})/
 
 export function pdfParagraphText(items: PdfTextItem[]): string {
   return extractPdfLayout(items).text
@@ -28,6 +29,19 @@ export function documentParagraphs(pages: Pick<Page, 'number' | 'text'>[]): Sour
   const all: SourceParagraph[] = []
   for (const page of [...pages].sort((a, b) => a.number - b.number)) {
     const blocks: string[] = []
+    const source = page.text.replace(/\r\n?/g, '\n')
+    // A display block can come from the PDF extractor or from vision OCR.
+    // Preserve its interior verbatim: prose dehyphenation could remove a minus.
+    const displays = protectedSpans(source).filter(({ start, end }) => {
+      if (!displayOrFence.test(source.slice(start, start + 10))) return false
+      const lineEnd = source.indexOf('\n', end)
+      return (
+        !source.slice(source.lastIndexOf('\n', start - 1) + 1, start).trim() &&
+        !source.slice(end, lineEnd === -1 ? source.length : lineEnd).trim()
+      )
+    })
+    let offset = 0,
+      displayIndex = 0
     let current = '',
       fenced = false,
       math = false,
@@ -37,8 +51,19 @@ export function documentParagraphs(pages: Pick<Page, 'number' | 'text'>[]): Sour
       current = ''
       block = ''
     }
-    for (const raw of page.text.replace(/\r\n?/g, '\n').split('\n')) {
+    for (const raw of source.split('\n')) {
       const line = raw.trim()
+      const lineEnd = offset + raw.length,
+        display = displays[displayIndex]
+      offset = lineEnd + 1
+      if (display && display.start <= lineEnd) {
+        flush()
+        if (display.end <= lineEnd) {
+          blocks.push(source.slice(display.start, display.end))
+          displayIndex++
+        }
+        continue
+      }
       if (/^```|^~~~/.test(line)) {
         if (!fenced) flush()
         current += (current ? '\n' : '') + raw
@@ -95,7 +120,8 @@ export function documentParagraphs(pages: Pick<Page, 'number' | 'text'>[]): Sour
         !list(previous.text) &&
         !heading(text) &&
         !list(text) &&
-        !/^```|^~~~|^\$\$/.test(text) &&
+        !displayOrFence.test(previous.text) &&
+        !displayOrFence.test(text) &&
         previous.text.length > 80 &&
         /^[\p{Ll}\u3400-\u9fff]/u.test(text)
       ) {
@@ -112,7 +138,7 @@ export function documentParagraphs(pages: Pick<Page, 'number' | 'text'>[]): Sour
 
 function splitLongParagraph(text: string, budget: number) {
   // Display equations, tables and code blocks must remain valid structures.
-  if (/^(?:\$\$|\\\[|```|~~~|\|)/.test(text)) return [text]
+  if (displayOrFence.test(text) || text.startsWith('|')) return [text]
   const parts: string[] = []
   let rest = text
   while (rest.length > budget) {
@@ -180,6 +206,8 @@ export const quoteSource = (text: string) =>
     .map((line) => (line ? `> ${line}` : '>'))
     .join('\n')
 
+export class ParagraphAlignmentError extends Error {}
+
 // Originals are assembled locally. The model never has to re-generate them.
 export function bilingualMarkdown(
   chunk: JobChunk,
@@ -190,7 +218,7 @@ export function bilingualMarkdown(
   const paragraphs = chunk.paragraphs || []
   const matches = [...response.matchAll(/^\s*<!--\s*paperead:([\w-]+)\s*-->[ \t]*\r?\n?/gm)]
   const bad = () => {
-    throw new Error(
+    throw new ParagraphAlignmentError(
       '对照翻译的段落标记缺失、重复或顺序不一致，未保存此批次。请继续重试或更换模型。',
     )
   }

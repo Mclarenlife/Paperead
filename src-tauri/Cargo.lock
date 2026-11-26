@@ -2539,7 +2539,7 @@ dependencies = [
 
 [[package]]
 name = "paperead"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "keyring",
  "tauri",

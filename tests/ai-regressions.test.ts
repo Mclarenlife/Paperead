@@ -167,6 +167,7 @@ describe('document task regressions', () => {
     const job = await createJob('sample-0', 'reflow', config)
     job.chunks[0].input = 'However, the effectiveness of this strategy depends critically'
     const prompt = documentPrompt(job, 0)
+    expect(prompt.system).toContain('$$\nE = mc^{2}\n$$')
     expect(prompt.input).toContain('Reformat')
     expect(prompt.input).toContain('NEVER complete, continue or invent')
     expect(prompt.input).toContain(JSON.stringify({ text: job.chunks[0].input }))
@@ -249,6 +250,153 @@ describe('document task regressions', () => {
       'retried earlier batch\n\nsaved despite peer failure',
     )
   })
+  it('repairs a lost equation in one grouped request and restores old bilingual checkpoints', async () => {
+    const job = await createJob('sample-0', 'translation', { ...config, bilingual: true })
+    const formula = '$$\n\\frac{y}{x_i^{2}}\n$$'
+    const lines = ['## Method', 'Assume $x_i$ is positive.', formula]
+    await db.jobs.update(job.id, {
+      promptVersion: 4,
+      chunks: [
+        { page: 1, input: '', output: '已经校对的译文' },
+        {
+          page: 2,
+          input: '',
+          paragraphs: lines.map((text, i) => ({ text, id: `p${i}`, page: 2, endPage: 2 })),
+        },
+      ],
+    })
+    // Valid paragraph markers, but a duplicated inline equation and a missing display equation.
+    fetchMock.mockImplementationOnce(async (_url, init) => {
+      const input = JSON.parse(init.body as string).messages[1].content
+      const token = input.match(/\[\[PRM_[\w]+_0\]\]/)?.[0]
+      expect(token).toBeDefined()
+      return json(
+        `<!-- paperead:p0 -->\n方法\n<!-- paperead:p1 -->\n令 ${token} ${token}\n<!-- paperead:p2 -->\n无`,
+      )
+    })
+    fetchMock.mockImplementationOnce(async (_url, init) => {
+      const input = JSON.parse(init.body as string).messages[1].content
+      const plan = JSON.parse(input.split('REPAIR_JSON:\n')[1].split('\nEND_REPAIR_JSON')[0])
+      expect(plan.blocks.flat().filter((p: { fixed?: string }) => p.fixed === 'math')).toHaveLength(
+        2,
+      )
+      expect(
+        plan.blocks
+          .flat()
+          .filter((p: { id?: string }) => p.id)
+          .map((p: { text: string }) => p.text),
+      ).toEqual(['Method', 'Assume', 'is positive.'])
+      return json(
+        JSON.stringify({
+          translations: [
+            { id: 's3', text: '为正数。' },
+            { id: 's1', text: '方法' },
+            { id: 's2', text: '设' },
+          ],
+        }),
+      )
+    })
+    await runJob(job.id)
+    const result = (await db.jobs.get(job.id))!
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(result.status).toBe('completed')
+    expect(result.chunks[0].output).toBe('已经校对的译文')
+    expect(result.chunks[1].output).toBe(
+      `> ## Method\n\n## 方法\n\n> Assume $x_i$ is positive.\n\n设 $x_i$ 为正数。\n\n> $$\n> \\frac{y}{x_i^{2}}\n> $$\n\n${formula}`,
+    )
+  })
+  it('keeps a gap after invalid repair data, finishes later batches and only retries the gap', async () => {
+    const job = await createJob('sample-0', 'translation', config)
+    await db.jobs.update(job.id, {
+      chunks: [
+        { page: 3, endPage: 4, input: 'Given $x$ it follows.' },
+        { page: 5, input: '$$\ny = x^2\n$$' },
+        { page: 6, input: 'Next paragraph.' },
+      ],
+    })
+    fetchMock
+      .mockResolvedValueOnce(json('公式缺失'))
+      .mockResolvedValueOnce(
+        json(
+          JSON.stringify({
+            translations: [
+              { id: 's1', text: '设' },
+              { id: 's1', text: '可得。' },
+            ],
+          }),
+        ),
+      )
+      .mockResolvedValueOnce(json('下一段。'))
+    await runJob(job.id)
+    const partial = (await db.jobs.get(job.id))!
+    expect(partial.status).toBe('failed')
+    expect(partial.error).toContain('第 1 批（第 3–4 页）')
+    expect(partial.chunks.map((c) => c.output)).toEqual([undefined, '$$\ny = x^2\n$$', '下一段。'])
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    fetchMock.mockImplementationOnce(async (_url, init) => {
+      const token = JSON.parse(init.body as string).messages[1].content.match(
+        /\[\[PRM_[\w]+_0\]\]/,
+      )[0]
+      return json(`由 ${token} 可得。`)
+    })
+    await runJob(job.id)
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect((await db.jobs.get(job.id))?.chunks[0].output).toBe('由 $x$ 可得。')
+  })
+  it('catches a formula moved into a different bilingual paragraph even when both markers survive', async () => {
+    const job = await createJob('sample-0', 'translation', { ...config, bilingual: true })
+    await db.jobs.update(job.id, {
+      chunks: [
+        {
+          page: 1,
+          input: '',
+          paragraphs: [
+            { id: 'p1', page: 1, endPage: 1, text: 'Take $x$.' },
+            { id: 'p2', page: 1, endPage: 1, text: 'Then proceed.' },
+          ],
+        },
+      ],
+    })
+    fetchMock.mockImplementationOnce(async (_url, init) => {
+      const input = JSON.parse(init.body as string).messages[1].content
+      const token = input.match(/\[\[PRM_\w+\]\]/)[0]
+      return json(`<!-- paperead:p1 -->\n取。\n<!-- paperead:p2 -->\n然后依据 ${token} 继续。`)
+    })
+    fetchMock.mockResolvedValueOnce(
+      json('{"translations":[{"id":"s1","text":"取"},{"id":"s2","text":"然后继续。"}]}'),
+    )
+    await runJob(job.id)
+    const result = (await db.jobs.get(job.id))!
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(result.status).toBe('completed')
+    expect(result.chunks[0].output).toBe('> Take $x$.\n\n取 $x$.\n\n> Then proceed.\n\n然后继续。')
+  })
+  it('cancels an in-flight prose repair without saving placeholders, JSON or a partial output', async () => {
+    const job = await createJob('sample-0', 'translation', config)
+    await db.jobs.update(job.id, { chunks: [{ page: 1, input: 'Consider $x$.' }] })
+    fetchMock.mockResolvedValueOnce(json('设')).mockImplementationOnce(() => new Promise(() => {}))
+    const running = runJob(job.id)
+    await vi.waitFor(() => expect(getJobProgress(job.id)?.fragments[0]?.phase).toBe('repairing'))
+    cancelJob(job.id)
+    await running
+    expect((await db.jobs.get(job.id))?.status).toBe('cancelled')
+    expect((await db.jobs.get(job.id))?.chunks[0].output).toBeUndefined()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+  it('retries a disconnected translation stream once from the start', async () => {
+    const job = await createJob('sample-0', 'translation', config)
+    await db.jobs.update(job.id, { chunks: [{ page: 1, input: 'A complete sentence.' }] })
+    const interrupted = () => sse([{ choices: [{ delta: { content: '没有完成' } }] }])
+    fetchMock.mockResolvedValueOnce(interrupted()).mockResolvedValueOnce(interrupted())
+    await runJob(job.id)
+    expect((await db.jobs.get(job.id))?.chunks[0].output).toBeUndefined()
+    expect((await db.jobs.get(job.id))?.status).toBe('failed')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    fetchMock.mockResolvedValueOnce(interrupted()).mockResolvedValueOnce(json('完整的一句话。'))
+    await runJob(job.id)
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect((await db.jobs.get(job.id))?.chunks[0].output).toBe('完整的一句话。')
+  })
   it('claims only one same-kind task for a paper even if two versions start together', async () => {
     const a = await createJob('sample-0', 'reflow', { ...config, batchSize: 6000 })
     const b = await createJob('sample-0', 'reflow', { ...config, batchSize: 6000 })
@@ -320,6 +468,6 @@ describe('document task regressions', () => {
     await db.pages.update('sample-0:2', { text: '' })
     const job = await createJob('sample-0', 'reflow', config)
     expect(job.chunks[0].input).toBe('Abstract')
-    expect(job.sourceWarning).toContain('1 页没有可提取文字')
+    expect(job.sourceWarning).toContain('第 2 页没有可提取的文字')
   })
 })

@@ -166,6 +166,47 @@ describe('PDF layout and structure', () => {
     expect(result.text).toContain('$$\nE = mc^{2}\n$$')
     expect(result.warnings.join()).toContain('无法可靠解码')
   })
+  it('attaches separate PDF glyphs at one script position to a single exponent or subscript', () => {
+    const result = extractPdfLayout([
+      item('Ordinary research text establishes the baseline font.', 50, 750, 300),
+      item('x', 100, 705, 5),
+      item('1', 105, 709, 3, 6),
+      item('i', 105, 701, 3, 6),
+      item('0', 108, 709, 3, 6),
+      item('j', 108, 701, 3, 6),
+      item('0', 111, 709, 3, 6),
+      item('0', 114, 709, 3, 6),
+      item('= y', 119, 705, 20),
+      item('2', 139, 709, 3, 6),
+      item('其中 x = 1 表示初值。', 50, 680, 180),
+      item('∫', 100, 650, 5),
+      item('0', 105, 646, 3, 6),
+      item('∞', 105, 654, 3, 6),
+    ])
+    expect(result.text).toContain('$$\nx_{ij}^{1000} = y^{2}\n$$')
+    expect(result.text).toContain('\n\n其中 x = 1 表示初值。')
+    expect(result.text).toContain('$$\n\\int _{0}^{\\infty }\n$$')
+  })
+  it('preserves minus signs and source line breaks inside alternate display blocks before batching', () => {
+    const bracket = '\\[\nf(x)=a-\nb\n\\]'
+    const environment = '\\begin{align*}\nf &= a-\\delta \\\\\ng &= b-\nc\n\\end{align*}'
+    const longDisplay = '$$\n' + 'a+'.repeat(300) + 'b\n$$'
+    const chunks = planDocument(
+      [
+        { number: 1, text: 'Summary.\n' + bracket + '\n' + environment + '\n' + longDisplay },
+        { number: 2, text: 'where x is positive.' },
+      ],
+      500,
+    )
+    expect(chunks.flatMap((c) => c.paragraphs!.map((p) => p.text))).toEqual([
+      'Summary.',
+      bracket,
+      environment,
+      longDisplay,
+      'where x is positive.',
+    ])
+    expect(chunks.find((c) => c.input === longDisplay)).toMatchObject({ page: 1, endPage: 1 })
+  })
   it('never cuts a display equation, table or inline formula at the batch boundary', () => {
     const formula = '$$\n' + 'x_i + '.repeat(180) + '0\n$$'
     const table = '| A | B |\n| --- | --- |\n' + '| long cell | other cell |\n'.repeat(45)
@@ -235,7 +276,7 @@ describe('Markdown and formula integrity', () => {
       paperId: 'sample-0',
       number: 1,
       text: '## Method\n\nEnergy $E=mc^{2}$ is conserved.',
-      extractionVersion: 3,
+      extractionVersion: 4,
     })
     const job = await createJob('sample-0', 'translation', {
       ...config,
@@ -265,6 +306,6 @@ describe('Markdown and formula integrity', () => {
     saved = (await db.jobs.get(job.id))!
     expect(saved.thinkingMode).toBe('low')
     expect(saved.chunks[0].timing).toBeDefined()
-    expect((await db.pages.get('sample-0:1'))?.extractionVersion).toBe(3)
+    expect((await db.pages.get('sample-0:1'))?.extractionVersion).toBe(4)
   })
 })

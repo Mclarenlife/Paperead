@@ -1,6 +1,8 @@
 import type { Provider } from '../types'
 import type { RequestPhase } from './ai-progress'
 
+export class InterruptedResponseError extends Error {}
+
 export function abortable<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
   return new Promise((resolve, reject) => {
     const abort = () => reject(new DOMException('已取消', 'AbortError'))
@@ -91,7 +93,10 @@ export async function readAIStream(
   }
   try {
     while (!complete) {
-      const { value, done } = await abortable(reader.read(), signal)
+      const { value, done } = await abortable(reader.read(), signal).catch((error) => {
+        if (signal.aborted) throw error
+        throw new InterruptedResponseError('读取模型响应时连接中断。')
+      })
       buffer += done ? decoder.decode() : decoder.decode(value, { stream: true })
       if (buffer.length > 2_000_000) throw new Error('流式响应格式无效或事件过大。')
       let match: RegExpMatchArray | null
@@ -101,11 +106,20 @@ export async function readAIStream(
         buffer = buffer.slice(index + match[0].length)
       }
       if (done) {
-        if (!complete && buffer.trim()) event(buffer)
+        if (!complete && buffer.trim()) {
+          try {
+            event(buffer)
+          } catch (error) {
+            if (error instanceof SyntaxError)
+              throw new InterruptedResponseError('响应流在最后一个事件接收完整前中断。')
+            throw error
+          }
+        }
         break
       }
     }
-    if (!complete) throw new Error('响应流意外中断，当前批次未保存为完成，可继续重试。')
+    if (!complete)
+      throw new InterruptedResponseError('响应流意外中断，当前批次未保存为完成，可继续重试。')
     if (!output.trim()) throw new Error('服务商没有返回可用文本。请检查模型权限或内容限制。')
     return output.replace(/^```(?:markdown|md)?\s*\n([\s\S]*?)\n```\s*$/, '$1').trim()
   } finally {

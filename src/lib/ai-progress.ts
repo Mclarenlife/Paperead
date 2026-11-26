@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
-export type RequestPhase = 'queued' | 'connecting' | 'thinking' | 'receiving' | 'buffering'
+export type RequestPhase =
+  'queued' | 'connecting' | 'thinking' | 'receiving' | 'buffering' | 'repairing' | 'reconnecting'
 
 export interface JobProgress {
   startedAt: number

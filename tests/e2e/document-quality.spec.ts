@@ -33,6 +33,16 @@ test('real PDF preserves headings, two-column paragraphs and scripts; upgrading 
   }
   sheet.drawText('E = mc', { x: 100, y: 610, size: 10, font })
   sheet.drawText('2', { x: 100 + font.widthOfTextAtSize('E = mc', 10), y: 614, size: 6, font })
+  const italic = await pdf.embedFont(StandardFonts.TimesRomanItalic)
+  const scriptX = 100 + font.widthOfTextAtSize('x', 10)
+  sheet.drawText('x', { x: 100, y: 585, size: 10, font })
+  sheet.drawText('1', { x: scriptX, y: 589, size: 6, font })
+  sheet.drawText('0', {
+    x: scriptX + font.widthOfTextAtSize('1', 6),
+    y: 589,
+    size: 6,
+    font: italic,
+  })
   const second = pdf.addPage([595, 842])
   second.drawText('Old second page', { x: 50, y: 700, size: 12, font })
   await mkdir('.tmp/quality-016', { recursive: true })
@@ -44,7 +54,7 @@ test('real PDF preserves headings, two-column paragraphs and scripts; upgrading 
       { db } = await load('/src/lib/db.ts')
     const paper = await db.papers.filter((p: any) => p.title === 'Layout Quality Study').first()
     const first = await db.pages.get(`${paper.id}:1`)
-    await db.pages.update(`${paper.id}:1`, { extractionVersion: 2, text: 'legacy flattened text' })
+    await db.pages.update(`${paper.id}:1`, { extractionVersion: 3, text: 'legacy flattened text' })
     await db.pages.update(`${paper.id}:2`, {
       extractionVersion: 2,
       text: '## Recognized math\n\n$$\\frac{a}{b}$$',
@@ -57,10 +67,12 @@ test('real PDF preserves headings, two-column paragraphs and scripts; upgrading 
   expect(result.first.text).toContain('# Layout Quality Study')
   expect(result.first.text).toContain('## 1 Introduction')
   expect(result.first.text).toContain('$$\nE = mc^{2}\n$$')
+  expect(result.first.text).toContain('$$\nx^{10}\n$$')
   expect(result.first.text.indexOf('Right body line 0')).toBeGreaterThan(
     result.first.text.indexOf('Left body line 3'),
   )
   expect(result.refreshed[0].text).toBe(result.first.text)
+  expect(result.refreshed[0].extractionVersion).toBe(4)
   expect(result.refreshed[1].text).toBe('## Recognized math\n\n$$\\frac{a}{b}$$')
   await page.getByRole('button', { name: '阅读 Layout Quality Study', exact: true }).click()
   await expect(page.locator('.pdf-page-slot[data-active="true"] .textLayer')).toContainText(

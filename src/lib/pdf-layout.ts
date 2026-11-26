@@ -1,5 +1,7 @@
 import { headingLevel } from './academic-markdown'
 
+export const PDF_EXTRACTION_VERSION = 4
+
 export type PdfTextItem = {
   str?: string
   hasEOL?: boolean
@@ -73,7 +75,7 @@ export function extractPdfLayout(items: PdfTextItem[], options: { page?: number 
           Math.abs(r.y - g.y) < body * 0.8 &&
           r.glyphs.some(
             (p) =>
-              p.height >= body * 0.9 &&
+              (p.height >= body * 0.9 || Math.abs(p.y - g.y) < Math.max(1.5, g.height * 0.23)) &&
               g.x >= p.x &&
               g.x - p.end < body * 0.65 &&
               g.x >= p.end - body,
@@ -85,8 +87,18 @@ export function extractPdfLayout(items: PdfTextItem[], options: { page?: number 
   const lines: Line[] = []
   for (const row of rows) {
     let line: Line | undefined
+    let subscript = '',
+      superscript = ''
+    // PDF.js may return one run per glyph, even at the same script position.
+    // Group both sides of the same base before emitting TeX (x^{1}^{0} is invalid).
+    const flushScripts = () => {
+      if (line && subscript) line.text += `_{${subscript}}`
+      if (line && superscript) line.text += `^{${superscript}}`
+      subscript = superscript = ''
+    }
     for (const g of row.glyphs.sort((a, b) => a.x - b.x)) {
       if (line && g.x - line.end > body * 2.5) {
+        flushScripts()
         lines.push(line)
         line = undefined
       }
@@ -98,13 +110,15 @@ export function extractPdfLayout(items: PdfTextItem[], options: { page?: number 
       const script =
         g.height < line.height * 0.85 &&
         Math.abs(dy) > body * 0.18 &&
-        /^[\wα-ω+−=-]+$/u.test(g.text.trim()) &&
+        /^[\w\p{Script=Greek}∞+−=-]+$/u.test(g.text.trim()) &&
         g.x - line.end < body * 0.65 &&
-        /[\wα-ω)}]$/u.test(line.text)
+        /[\w\p{Script=Greek}∑∫)}]$/u.test(line.text)
       if (script) {
-        line.text += `${dy > 0 ? '^' : '_'}{${latexSymbols(g.text.trim())}}`
+        if (dy > 0) superscript += g.text.trim()
+        else subscript += g.text.trim()
         line.script = true
       } else {
+        flushScripts()
         const space =
           !/\s$/.test(line.text) && !/^\s/.test(g.text) && g.x - line.end > body * 0.12 ? ' ' : ''
         line.text += space + g.text
@@ -112,6 +126,7 @@ export function extractPdfLayout(items: PdfTextItem[], options: { page?: number 
       line.end = Math.max(line.end, g.end)
       line.height = Math.max(line.height, g.height)
     }
+    flushScripts()
     if (line) lines.push(line)
   }
   lines.sort((a, b) => b.y - a.y || a.x - b.x)
@@ -166,7 +181,10 @@ export function extractPdfLayout(items: PdfTextItem[], options: { page?: number 
     const mathLike = /[=∑∫≤≥≠≈∂∇]/.test(text) || line.script
     // Convert only simple, visibly linear expressions; complex layouts still
     // require a vision pass. A footnote superscript in prose is not an equation.
-    const prose = /[A-Za-z]{4,}/.test(text.replace(/\b(?:sin|cos|tan|log|exp|lim|max|min)\b/g, ''))
+    const prose =
+      /[A-Za-z]{4,}|[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(
+        text.replace(/\b(?:sin|cos|tan|log|exp|lim|max|min)\b/g, ''),
+      )
     const equation = mathLike && !prose && text.length < 400
     if (equation) text = `$$\n${latexSymbols(text)}\n$$`
     else if (line.script) {
