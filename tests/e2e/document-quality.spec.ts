@@ -8,6 +8,35 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator('.paper-card')).toHaveCount(6)
 })
 
+test('Ark chat settings expose the Seed thinking mode and apply it to requests', async ({
+  page,
+}) => {
+  const endpoint = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
+  const requests: object[] = []
+  await page.route(endpoint, async (route) => {
+    requests.push(route.request().postDataJSON())
+    await route.fulfill({
+      json: { choices: [{ message: { content: 'OK' }, finish_reason: 'stop' }] },
+    })
+  })
+  await page.getByRole('button', { name: '偏好设置' }).click()
+  const dialog = page.getByRole('dialog', { name: '偏好设置' })
+  await dialog.getByLabel('API 地址').fill(endpoint)
+  await dialog.getByLabel('模型 ID').fill('doubao-seed-2-1-turbo-260628')
+  await dialog.getByLabel('API Key', { exact: false }).fill('local-test-fixture')
+  await dialog.getByText('请求与性能设置', { exact: true }).click()
+  const mode = dialog.getByLabel('豆包 Seed 2.1 思考模式')
+  await expect(mode).toHaveValue('auto')
+  await dialog.getByRole('button', { name: '测试连接' }).click()
+  await expect(page.getByText('连接成功，模型返回了有效响应。', { exact: true })).toBeVisible()
+  expect(requests).toHaveLength(1)
+  expect(requests[0]).toMatchObject({ thinking: { type: 'disabled' }, stream: true })
+  await mode.selectOption('provider')
+  await dialog.getByRole('button', { name: '测试连接' }).click()
+  await expect.poll(() => requests.length).toBe(2)
+  expect(requests[1]).not.toHaveProperty('thinking')
+})
+
 test('real PDF preserves headings, two-column paragraphs and scripts; upgrading extraction preserves recognized pages', async ({
   page,
 }) => {

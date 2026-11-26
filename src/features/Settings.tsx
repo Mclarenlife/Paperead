@@ -26,7 +26,7 @@ import {
   supportsSecureCredentials,
 } from '../lib/credentials'
 import { BackupPanel } from '../components/BackupPanel'
-import { isDeepSeekV4 } from '../lib/model-capabilities'
+import { thinkingBackend } from '../lib/model-capabilities'
 import { errorMessage } from '../lib/utils'
 import { readProfiles, storeProfile, deleteProfile, profileSettings } from '../lib/profiles'
 import type { AISettings, Provider, AIProfile } from '../types'
@@ -49,6 +49,8 @@ export function Settings({
     [key, setKey] = useState(''),
     [busy, setBusy] = useState('')
   const toast = useToast()
+  const backend = thinkingBackend(form)
+  const thinkingModelName = backend && { ark: '豆包 Seed 2.1', deepseek: 'DeepSeek' }[backend]
   const [profiles, setProfiles] = useState<AIProfile[]>([]),
     [profilesReady, setProfilesReady] = useState(false)
   const [profileName, setProfileName] = useState('默认配置'),
@@ -455,9 +457,9 @@ export function Settings({
                 流式输出，实时显示进度
               </label>
               <div className="form-two">
-                {isDeepSeekV4(form) && (
+                {thinkingModelName && (
                   <label className="field">
-                    DeepSeek 思考模式
+                    {thinkingModelName} 思考模式
                     <select
                       value={form.thinkingMode || 'auto'}
                       onChange={(e) =>
@@ -467,7 +469,7 @@ export function Settings({
                         })
                       }
                     >
-                      <option value="auto">关闭思考 · 翻译与排版推荐</option>
+                      <option value="auto">关闭思考 · 翻译推荐</option>
                       <option value="low">低强度思考</option>
                       <option value="high">高强度思考 · 等待较长</option>
                       <option value="provider">服务商默认 · 不发送思考参数</option>
@@ -480,6 +482,7 @@ export function Settings({
                     type="number"
                     min={30}
                     max={900}
+                    aria-describedby="ai-timeout-description"
                     value={form.timeoutSeconds}
                     onChange={(e) => setForm({ ...form, timeoutSeconds: Number(e.target.value) })}
                   />
@@ -519,9 +522,14 @@ export function Settings({
                 </label>
               </div>
               <p className="field-hint">
-                DeepSeek V4 默认关闭思考以减少首字等待；第三方网关不支持该参数时可选服务商默认。
+                {thinkingModelName &&
+                  `${thinkingModelName} 翻译时默认关闭思考，可缩短等待正文的时间。`}
                 长文使用较短首批，后续按段落跨页合并，默认每批最多 6000 字符；公式和表格保持完整。
-                出现 429 时降低并行数。批次大小对新任务生效，对照原文由本机插入。
+                出现 429
+                时可降低并行数。调小批次后，继续同一配置的翻译任务会重新划分未完成的长批次。
+              </p>
+              <p className="field-hint" id="ai-timeout-description">
+                超时从发出请求开始计算。流式输出每收到新的正文就重新计时，非流式请求需在时限内返回完整结果。
               </p>
             </details>
             <div className="privacy-note">
@@ -604,7 +612,7 @@ export function Settings({
             <div className="privacy-note">
               <BookLogo />
               <p>
-                Paperead 0.1.12 · 本地优先的论文阅读工作台
+                Paperead 0.1.13 · 本地优先的论文阅读工作台
                 <br />
                 快捷键：Ctrl / ⌘ K 搜索 · Ctrl / ⌘ O 导入 · Esc 关闭面板
               </p>

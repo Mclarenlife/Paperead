@@ -12,6 +12,7 @@ import {
 } from '../src/lib/ai'
 import { db, seedDatabase } from '../src/lib/db'
 import { platformFetch } from '../src/lib/platform'
+import { BatchSizeError } from '../src/lib/ai-stream'
 import { getJobProgress } from '../src/lib/ai-progress'
 import { paragraphMarker } from '../src/lib/document'
 import { createBackup, restoreBackup } from '../src/lib/backup'
@@ -88,6 +89,84 @@ describe('request lifecycle regressions', () => {
     controller.abort()
     await cancelled
     expect(vi.getTimerCount()).toBe(0)
+  })
+  it('allows visible SSE output to span several deadlines without including local queue time', async () => {
+    vi.useFakeTimers()
+    // The real request origin has only one slot. A pending second request
+    // must get its full first-output window after that slot is released.
+    let controller!: ReadableStreamDefaultController<Uint8Array>
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        new ReadableStream<Uint8Array>({
+          start(stream) {
+            controller = stream
+          },
+        }),
+        { headers: { 'Content-Type': 'text/event-stream' } },
+      ),
+    )
+    fetchMock.mockResolvedValueOnce(json('第二个批次'))
+    const first = requestAI(config, 'task', 'A')
+    const second = requestAI(config, 'task', 'B')
+    const send = (content: string, finish_reason?: string) =>
+      controller.enqueue(
+        new TextEncoder().encode(
+          `data: ${JSON.stringify({ choices: [{ delta: { content }, finish_reason }] })}\n\n`,
+        ),
+      )
+    await vi.advanceTimersByTimeAsync(25_000)
+    send('前言。')
+    await vi.advanceTimersByTimeAsync(25_000)
+    send('方法。')
+    await vi.advanceTimersByTimeAsync(25_000)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    send('结果。', 'stop')
+    expect(await first).toBe('前言。方法。结果。')
+    expect(await second).toBe('第二个批次')
+    expect(vi.getTimerCount()).toBe(0)
+  })
+  it.each([
+    ['thinking', '模型已返回思考过程，等待首段正文'],
+    ['output', '连续未收到新的正文内容'],
+    ['heartbeat', '已连接，等待首段正文'],
+  ])('times out stalled %s streams despite padding and heartbeats', async (stage, detail) => {
+    vi.useFakeTimers()
+    let controller!: ReadableStreamDefaultController<Uint8Array>
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        new ReadableStream<Uint8Array>({
+          start(stream) {
+            controller = stream
+          },
+        }),
+        { headers: { 'Content-Type': 'text/event-stream' } },
+      ),
+    )
+    const failed = requestAI(config, 'task', 'A').catch((error: unknown) => error)
+    await vi.advanceTimersByTimeAsync(10_000)
+    const send = (event: string) => controller.enqueue(new TextEncoder().encode(event + '\n\n'))
+    if (stage === 'thinking')
+      send('data: {"choices":[{"delta":{"reasoning_content":"still thinking"}}]}')
+    if (stage === 'output') send('data: {"choices":[{"delta":{"content":"已输出"}}]}')
+    await vi.advanceTimersByTimeAsync(15_000)
+    send(': heartbeat')
+    send('data: {"choices":[{"delta":{"content":" "}}]}')
+    await vi.advanceTimersByTimeAsync(stage === 'output' ? 15_000 : 5_000)
+    const error = await failed
+    expect(error).toBeInstanceOf(BatchSizeError)
+    expect(error).toHaveProperty('message', expect.stringContaining(detail))
+    expect(vi.getTimerCount()).toBe(0)
+  })
+  it('preserves a rate-limit status even if the error body never completes', async () => {
+    vi.useFakeTimers()
+    fetchMock.mockResolvedValueOnce(
+      new Response(new ReadableStream({ start() {} }), { status: 429 }),
+    )
+    const failed = requestAI(config, 'task', 'text').catch((error: unknown) => error)
+    await vi.advanceTimersByTimeAsync(30_000)
+    const error = await failed
+    expect(error).toHaveProperty('message', expect.stringContaining('HTTP 429'))
+    expect(error).not.toBeInstanceOf(BatchSizeError)
   })
   it.each<Provider>(['compatible', 'openai', 'anthropic', 'gemini'])(
     'decodes split UTF-8 SSE for %s without mixing reasoning into the document',
@@ -428,10 +507,16 @@ describe('document task regressions', () => {
     const output = job.chunks[0]
       .paragraphs!.map((p, i) => `${paragraphMarker(p.id)}\n段落 ${i + 1} 的译文。`)
       .join('\n\n')
-    fetchMock.mockResolvedValueOnce(json(output))
+    // Captured Ark behavior: all markers are present, but it echoes the
+    // read-only document title as a heading before the first marker.
+    fetchMock.mockResolvedValueOnce(json(`# ${job.documentTitle}\n\n${output}`))
     await runJob(job.id)
     const saved = (await db.jobs.get(job.id))!
     expect(saved.status).toBe('completed')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(documentPrompt(job, 0).restoreMath('# Unrelated heading\n' + output)).toContain(
+      '# Unrelated heading',
+    )
     expect(saved.chunks[0].output).toContain(`> ${job.chunks[0].paragraphs![0].text}`)
     await db.annotations.add({
       id: 'document-annotation',

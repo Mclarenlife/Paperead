@@ -136,23 +136,25 @@ export function documentParagraphs(pages: Pick<Page, 'number' | 'text'>[]): Sour
   }))
 }
 
-function splitLongParagraph(text: string, budget: number) {
+function splitLongParagraph(text: string, budget: number, firstBudget = budget) {
   // Display equations, tables and code blocks must remain valid structures.
   if (displayOrFence.test(text) || text.startsWith('|')) return [text]
   const parts: string[] = []
   let rest = text
-  while (rest.length > budget) {
-    const prefix = rest.slice(0, budget)
+  let limit = firstBudget
+  while (rest.length > limit) {
+    const prefix = rest.slice(0, limit)
     const breaks = [...prefix.matchAll(/[.!?。！？]["'”’）)\]]*(?:\s+|(?=[\u3400-\u9fff]))/g)]
     let end = breaks.at(-1)
       ? breaks.at(-1)!.index! + breaks.at(-1)![0].length
       : prefix.lastIndexOf(' ')
-    if (end < budget / 3) end = budget
+    if (end < limit / 3) end = limit
     const span = protectedSpans(rest).find((s) => s.start < end && s.end > end)
     if (span) end = span.start > 0 ? span.start : span.end
     if (/[\uD800-\uDBFF]/.test(rest[end - 1])) end--
     parts.push(rest.slice(0, end).trim())
     rest = rest.slice(end).trimStart()
+    limit = budget
   }
   if (rest) parts.push(rest)
   return parts
@@ -164,8 +166,9 @@ export function planDocument(
   firstBudget = budget,
 ): JobChunk[] {
   budget = Math.max(500, Math.floor(budget))
-  const paragraphs = documentParagraphs(pages).flatMap((paragraph) =>
-    splitLongParagraph(paragraph.text, budget).map((text, index) => ({
+  const initial = Math.max(500, Math.min(budget, firstBudget))
+  const paragraphs = documentParagraphs(pages).flatMap((paragraph, n) =>
+    splitLongParagraph(paragraph.text, budget, n === 0 ? initial : budget).map((text, index) => ({
       ...paragraph,
       id: `${paragraph.id}-${index + 1}`,
       text,
@@ -186,7 +189,7 @@ export function planDocument(
     length = 0
   }
   for (const paragraph of paragraphs) {
-    const limit = !chunks.length ? Math.min(budget, Math.max(500, firstBudget)) : budget
+    const limit = !chunks.length ? initial : budget
     if (group.length && length + paragraph.text.length + 2 > limit) flush()
     group.push(paragraph)
     length += paragraph.text.length + 2
@@ -196,6 +199,77 @@ export function planDocument(
     ...chunk,
     contextBefore: chunks[index - 1]?.input.slice(-500) || '',
     contextAfter: chunks[index + 1]?.input.slice(0, 500) || '',
+  }))
+}
+
+// Subdivide the saved source snapshot; opening the PDF here could replace text
+// underneath previous translation checkpoints or annotations.
+export function smallerTranslationChunks(
+  chunk: JobChunk,
+  budget: number,
+  { afterFailure = false, bilingual = false }: { afterFailure?: boolean; bilingual?: boolean } = {},
+): JobChunk[] {
+  if (chunk.output || (afterFailure && chunk.sizeRetry)) return [chunk]
+  const paragraphs = bilingual ? chunk.paragraphs : undefined
+  const source = paragraphs?.map((p) => p.text).join('\n\n') ?? chunk.input
+  const limit = afterFailure ? Math.max(500, Math.ceil(source.length / 2)) : budget
+  if (source.length <= limit) return [chunk]
+
+  // Bilingual originals stay whole, retaining their IDs and exact source text.
+  // Plain jobs from older versions only store the text and the overall page range.
+  let units: SourceParagraph[]
+  if (paragraphs?.length) units = paragraphs
+  else {
+    const spans = protectedSpans(source)
+    const blocks: string[] = []
+    let start = 0,
+      spanIndex = 0
+    for (const gap of source.matchAll(/\n[ \t]*\n+/g)) {
+      while (spanIndex < spans.length && spans[spanIndex].end <= gap.index) spanIndex++
+      if (spans[spanIndex] && spans[spanIndex].start < gap.index + gap[0].length) continue
+      blocks.push(source.slice(start, gap.index))
+      start = gap.index + gap[0].length
+    }
+    blocks.push(source.slice(start))
+    units = blocks.flatMap((block) =>
+      splitLongParagraph(block, limit)
+        .filter(Boolean)
+        .map((text) => ({
+          id: '',
+          text,
+          page: chunk.page,
+          endPage: chunk.endPage ?? chunk.page,
+        })),
+    )
+  }
+
+  const groups: SourceParagraph[][] = []
+  let group: SourceParagraph[] = [],
+    length = 0
+  for (const unit of units) {
+    const newLength = length + (group.length ? 2 : 0) + unit.text.length
+    const boundary = afterFailure
+      ? !groups.length && Math.abs(limit - length) <= Math.abs(limit - newLength)
+      : newLength > limit
+    if (boundary && group.length) {
+      groups.push(group)
+      group = []
+      length = 0
+    }
+    length += (group.length ? 2 : 0) + unit.text.length
+    group.push(unit)
+  }
+  if (group.length) groups.push(group)
+  if (groups.length < 2) return [chunk]
+  const texts = groups.map((parts) => parts.map((p) => p.text).join('\n\n'))
+  return groups.map((parts, i) => ({
+    page: parts[0].page,
+    endPage: parts.at(-1)!.endPage,
+    input: paragraphs ? '' : texts[i],
+    ...(paragraphs && { paragraphs: parts }),
+    ...((afterFailure || chunk.sizeRetry) && { sizeRetry: true as const }),
+    contextBefore: i ? texts[i - 1].slice(-500) : chunk.contextBefore,
+    contextAfter: i + 1 < groups.length ? texts[i + 1].slice(0, 500) : chunk.contextAfter,
   }))
 }
 

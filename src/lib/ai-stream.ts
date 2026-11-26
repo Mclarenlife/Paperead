@@ -2,6 +2,9 @@ import type { Provider } from '../types'
 import type { RequestPhase } from './ai-progress'
 
 export class InterruptedResponseError extends Error {}
+// Retrying a shorter source fragment may resolve a model's token limit or a
+// stalled generation. Connection, credential and quota errors stay separate.
+export class BatchSizeError extends Error {}
 
 export function abortable<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -53,6 +56,11 @@ export async function readAIStream(
     if (provider === 'openai') {
       if (value.type === 'response.output_text.delta') output += value.delta || ''
       if (value.type === 'response.refusal.delta') throw new Error('模型拒绝处理当前批次。')
+      if (
+        value.type === 'response.incomplete' &&
+        value.response?.incomplete_details?.reason === 'max_output_tokens'
+      )
+        throw new BatchSizeError('模型输出达到长度限制，当前批次未保存为完成。')
       if (value.type === 'response.incomplete')
         throw new Error('模型输出被截断，当前批次未保存为完成。')
       if (value.type === 'response.failed')
@@ -65,11 +73,13 @@ export async function readAIStream(
       if (value.type === 'content_block_delta' && value.delta?.type === 'text_delta')
         output += value.delta.text || ''
       if (value.delta?.stop_reason === 'max_tokens')
-        throw new Error('模型输出被截断，当前批次未保存为完成。')
+        throw new BatchSizeError('模型输出被截断，当前批次未保存为完成。')
       if (value.delta?.stop_reason === 'refusal') throw new Error('模型拒绝处理当前批次。')
       if (value.type === 'message_stop') complete = true
     } else if (provider === 'gemini') {
       const candidate = value.candidates?.[0]
+      if (candidate?.finishReason === 'MAX_TOKENS')
+        throw new BatchSizeError('模型输出达到长度限制，当前批次未保存为完成。')
       if (candidate?.finishReason && candidate.finishReason !== 'STOP')
         throw new Error(`模型未正常完成：${candidate.finishReason}。当前批次未保存为完成。`)
       output +=
@@ -81,7 +91,7 @@ export async function readAIStream(
     } else {
       const choice = value.choices?.[0]
       if (choice?.finish_reason === 'length')
-        throw new Error('模型输出被截断，当前批次未保存为完成。')
+        throw new BatchSizeError('模型输出被截断，当前批次未保存为完成。')
       if (choice?.finish_reason === 'content_filter' || choice?.delta?.refusal)
         throw new Error('模型拒绝处理当前批次。')
       if (typeof choice?.delta?.content === 'string') output += choice.delta.content

@@ -118,6 +118,41 @@ describe('DeepSeek latency and streaming', () => {
   })
 })
 
+describe('Ark Seed translation requests', () => {
+  const endpoint = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
+  const ark = { ...config, baseUrl: endpoint + '/', model: 'doubao-seed-2-1-turbo-260628' }
+  it('uses the pasted chat endpoint once and requests a direct answer for stored default settings', () => {
+    const request = buildRequest(ark, 'fixture', 'translate', 'Hello')
+    expect(request.url).toBe(endpoint)
+    expect(request.body).toMatchObject({
+      model: ark.model,
+      stream: true,
+      thinking: { type: 'disabled' },
+    })
+    expect(request.body).not.toHaveProperty('reasoning_effort')
+    for (const effort of ['low', 'high'] as const)
+      expect(buildRequest({ ...ark, thinkingMode: effort }, 'fixture', '', '').body).toMatchObject({
+        thinking: { type: 'enabled' },
+        reasoning_effort: effort,
+      })
+    const defaults = buildRequest({ ...ark, thinkingMode: 'provider' }, 'fixture', '', '').body
+    expect(defaults).not.toHaveProperty('thinking')
+    expect(defaults).not.toHaveProperty('reasoning_effort')
+  })
+  it('uses the requested protocol and leaves opaque deployments and other gateways on their defaults', () => {
+    const responses = buildRequest({ ...ark, provider: 'openai' }, 'fixture', '', '')
+    expect(responses.url).toBe('https://ark.cn-beijing.volces.com/api/v3/responses')
+    expect(responses.body).toMatchObject({ thinking: { type: 'disabled' } })
+    for (const settings of [
+      { ...ark, baseUrl: 'https://third-party.example/v1' },
+      { ...ark, baseUrl: 'https://ark.cn-beijing.volces.com/other/api' },
+      { ...ark, model: 'ep-deployment' },
+      { ...ark, model: 'doubao-seed-translation-250915' },
+    ])
+      expect(buildRequest(settings, 'fixture', '', '').body).not.toHaveProperty('thinking')
+  })
+})
+
 describe('PDF layout and structure', () => {
   it('recovers title, section levels, paragraphs and left-column-first reading order from interleaved runs', () => {
     const result = extractPdfLayout(

@@ -1,16 +1,42 @@
 import type { AISettings } from '../types'
 
-// V4 defaults to high-effort thinking; document transforms explicitly opt out.
-// Unknown models retain their provider defaults instead of receiving alien flags.
 export const isDeepSeekV4 = (config: AISettings) =>
   /^(?:deepseek\/)?deepseek-v4-(?:flash|pro)(?:-|$)/i.test(config.model.trim())
 
+// Ark documents these Seed 2.1 revisions as thinking-enabled by default.
+// Opaque deployment IDs and third-party gateways may expose other capabilities.
+const arkSeedModels = new Set([
+  'doubao-seed-2-1-turbo-260628',
+  'doubao-seed-2-1-pro-260628',
+  'doubao-seed-2-1-pro-260915',
+  'doubao-seed-2-1-lite-260915',
+])
+
+export function thinkingBackend(config: AISettings) {
+  if (config.provider === 'gemini') return undefined
+  if (isDeepSeekV4(config)) return 'deepseek'
+  if (config.provider === 'anthropic' || !arkSeedModels.has(config.model.trim())) return undefined
+  try {
+    const url = new URL(config.baseUrl)
+    if (
+      url.origin === 'https://ark.cn-beijing.volces.com' &&
+      /^\/api\/v3(?:\/(?:chat\/completions|responses))?\/*$/.test(url.pathname)
+    )
+      return 'ark'
+  } catch {
+    // The settings form calls this while the endpoint is being typed.
+  }
+}
+
 export function thinkingParameters(config: AISettings): Record<string, unknown> {
-  if (!isDeepSeekV4(config) || config.thinkingMode === 'provider') return {}
+  const backend = thinkingBackend(config)
+  if (!backend || config.thinkingMode === 'provider') return {}
   const effort =
     config.thinkingMode === 'low' || config.thinkingMode === 'high' ? config.thinkingMode : 'none'
-  if (config.provider === 'openai') return { reasoning: { effort } }
-  if (config.provider === 'gemini') return {}
+  if (config.provider === 'openai') {
+    if (backend === 'ark' && effort === 'none') return { thinking: { type: 'disabled' } }
+    return { reasoning: { effort } }
+  }
   return {
     thinking: { type: effort === 'none' ? 'disabled' : 'enabled' },
     ...(effort === 'none'

@@ -2,15 +2,15 @@
 
 **让阅读，沉淀为知识。** 一个使用 Tauri 2、React 19 与 TypeScript 构建的本地优先论文阅读工作台。
 
-**0.1.12 测试版**修复了翻译中断和部分公式排版错误。模型漏掉、重复或挪动了公式标记时，应用会补译受影响批次的文字，并按原文位置放回公式。仍然无法对齐的批次会显示页码，其他批次可以继续。阅读器支持原文、译文和对照视图。 [阅读器说明](docs/READER-0.1.11.md)
+**0.1.13 测试版**改进了长篇论文翻译。使用火山方舟的豆包 Seed 2.1 Turbo 时，默认关闭深度思考，偏好设置中可切回服务商默认。完整的 Chat Completions 地址和 `/api/v3` 基础地址都可直接填写。
 
-升级后，在未完成的任务上点「继续」可接着已有译文翻译。若旧译文已从 PDF 读错上下标，点「使用当前配置重新处理」会用新版提取逻辑创建译文版本。对照 PDF 后仍无法辨认的复杂公式，可以先对相关页进行视觉版面解析。
+流式翻译按等待正文的时间判断超时，持续返回译文的批次可以超过设定时长。遇到输出上限或生成停顿时，应用会尝试拆分较长的批次。对已经中断的任务，点「继续」会保留已完成译文。需要主动缩小批次时，在同一服务配置下调低「批次大小」后继续即可。
 
 | 测试平台 | 本地安装包 |
 | --- | --- |
-| Windows x64 | `release/Paperead_0.1.12_x64-setup.exe`，未签名，需要 WebView2 |
-| Android ARM64 | `release/Paperead_0.1.12_Android-arm64-test.apk`，沿用本地测试签名，最低 API 26 |
-| macOS Apple Silicon / Intel | `release/Paperead_0.1.12_macOS-universal.dmg`，ad-hoc 签名，未公证 |
+| Windows x64 | `release/Paperead_0.1.13_x64-setup.exe`，未签名，需要 WebView2 |
+| Android ARM64 | `release/Paperead_0.1.13_Android-arm64-test.apk`，沿用本地测试签名，最低 API 26 |
+| macOS Apple Silicon / Intel | `release/Paperead_0.1.13_macOS-universal.dmg`，ad-hoc 签名，未公证 |
 
 每轮代码或界面修改验证后重新生成测试包，保留旧包；只使用本地安装包及 Actions 临时构建产物，不发布 GitHub Release。详见 [项目交付约定](AGENTS.md)。
 

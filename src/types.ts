@@ -136,6 +136,8 @@ export interface SourceParagraph {
   endPage: number
 }
 export interface JobChunk {
+  /** Already subdivided after an output limit or a generation timeout. */
+  sizeRetry?: true
   timing?: { queueMs: number; firstTextMs?: number; totalMs: number }
   page: number
   endPage?: number

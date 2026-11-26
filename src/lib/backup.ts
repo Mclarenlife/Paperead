@@ -150,6 +150,7 @@ export const backupSchema = z.object({
       status: z.enum(['running', 'completed', 'failed', 'cancelled']),
       chunks: z.array(
         z.object({
+          sizeRetry: z.literal(true).optional(),
           page: z.number().int().positive(),
           endPage: z.number().int().positive().optional(),
           input: text,
